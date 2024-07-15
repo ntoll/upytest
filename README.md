@@ -191,7 +191,7 @@ Traceback (most recent call last):
 AssertionError: Did not raise expected exception. Expected ValueError; but got None.
 
 ========================= short test summary info ==========================
-6 failed, 2 skipped, 6 passed in 1.55 seconds
+6 failed, 2 skipped, 6 passed in 0.00 seconds
 ```
 
 ## Developer setup
