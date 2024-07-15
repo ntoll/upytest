@@ -1,4 +1,5 @@
 import upytest
+import asyncio
 
 
 @upytest.skip("This test will be skipped")
@@ -35,23 +36,28 @@ async def test_async_passes():
 
 
 async def test_async_passes():
+    await asyncio.sleep(0.2)
     assert True, "This async test passes."
 
 
 async def test_async_fails():
+    await asyncio.sleep(0.2)
     assert False, "This async test fails."
 
 
 async def test_async_raises_exception():
+    await asyncio.sleep(0.2)
     with upytest.raises(ValueError):
         raise ValueError("This is a ValueError")
 
 
 async def test_async_does_not_raise_exception():
+    await asyncio.sleep(0.2)
     with upytest.raises(ValueError):
         pass
 
 
 async def test_async_does_not_raise_expected_exception():
+    await asyncio.sleep(0.2)
     with upytest.raises(ValueError, AssertionError):
         raise TypeError("This is a TypeError")
