@@ -35,6 +35,7 @@ It currently only implements naive versions of:
    ```python
    import upytest
 
+
    await upytest.run("./tests")
    ```
    (This is demonstrated in the `main.py` file in this repository.)
