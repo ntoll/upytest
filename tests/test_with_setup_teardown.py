@@ -2,6 +2,7 @@
 Tests in this module will use only the local setup and teardown functions. (See
 the browser console for the output of the setup and teardown functions.)
 """
+
 import upytest
 import asyncio
 from pyscript import window
