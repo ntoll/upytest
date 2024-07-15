@@ -2,7 +2,7 @@
     "files": {
         "./upytest.py": "",
         "./tests/conftest.py": "tests/conftest.py",
-        "./tests/test_stuff.py": "tests/test_stuff.py",
+        "./tests/test_core_functionality.py": "tests/test_core_functionality.py",
         "./tests/test_with_setup_teardown.py": "tests/test_with_setup_teardown.py"
     }
 }
