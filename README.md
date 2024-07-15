@@ -1,157 +1,249 @@
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://github.com/codespaces/new?hide_repo_select=true&ref=main&repo=816765904)
+# uPyTest (MicroPytest) 🔬🐍✅
 
-# 🐍📜 PyScript with GitHub Codespaces and Copilot
+A small and very limited module for very simple [PyTest](https://pytest.org) 
+inspired tests to run in the [MicroPython](https://micropython.org/) runtime
+within [PyScript](https://pyscript.net/). 
 
-_Create, customize and deploy your own [PyScript](https://pyscript.net)
-website in minutes._ ✨
+It currently only implements naive versions of:
 
-In this template repository we have the development environment and base set
-and ready to go. So that you can immediately launch your
-[Codespace](https://github.com/features/codespaces/) environment and start
-customizing your site using [Copilot](https://copilot.github.com) to help you
-write code faster.
+* Discovery of tests on the filesystem.
+* `assert` statements for testing state.
+* `assert <something>, "Some description"` to add contextual information.
+* Global `setup` and `teardown` functions via `conftest.py`.
+* Module specific `setup` and `teardown` functions.
+* A `skip("reason")` decorator for skipping test functions.
+* Checks for expected exceptions via a `raises` context manager.
+* Synchronous and asynchronous test cases.
 
-* **Who is this for?** __Anyone__ looking to create a
-  [PyScript](https://pyscript.net/) site, learn web development, or test out
-  Codespaces.
-* **How much experience do you need?** __Zero__. You decide how much you want
-  to customize based on your experience, and time available.
-* **Tools needed:** _None_. No need to install anything! All you need is a web
-  browser.
-* **Prerequisites:** _None_. This template includes your development
-  environment and deployable web app for you to create your own site.
+## Usage
 
-## About this PyScript template
+**This module is for use with MicroPython within PyScript.**
 
-This template includes the minimal viable PyScript application, from which you
-can build.
+### Setup
 
-### Quick Start
+1. Ensure the `upytest.py` file is in your Python path. You may need to copy
+   this over using the 
+   [files settings](https://docs.pyscript.net/2024.7.1/user-guide/configuration/#files). 
+   (See the `config.json` file in this repository for an example of this in 
+   action.)
+2. Create and copy over your tests. Once again use the files settings, and the
+   `config.json` in this repository demonstrates how to copy over the content
+   of the `tests` directory found in this repository.
+3. In your `main.py` (or whatever you call your main Python script), simply
+   import upytest and await the `run` method while passing in the test 
+   directory:
+   ```python
+   import upytest
 
-1. Click the **Use this Template** button and then **Create a new repository** as can be seen in the image below.
-   Note: Make sure you've signed in to GitHub otherwise, you wouldn't see the **Use this Template** button.
-![PyScript web application](https://raw.githubusercontent.com/education/codespaces-project-template-js/main/__images__/use-this-template.png "Use this Template Image Guide")
-1. Select the repository owner (e.g. your GitHub account)
-1. Enter a unique name for your new repository
-1. Click the **Code** button
-1. Click **Create Codespace on main** button
-1. Customize your PyScript site with Copilot
-1. [Deploy your site](#-deploy-your-web-application)
+   await upytest.run("./tests")
+   ```
+   (This is demonstrated in the `main.py` file in this repository.)
+4. In your `index.html` make sure you use the `async` and `terminal` attributes
+   when referencing your MicroPython script (as in the `index.html` file in
+   this repository):
+   ```html
+   <script type="mpy" src="./main.py" config="./config.json" terminal async></script>
+   ```
 
-<details>
-   <summary><b>🎥 To learn more about Codespaces, watch our video tutorial series</b></summary>
+Simply point your browser at your `index.html` and your should see the test
+suite run.
 
-   [![Codespaces Tutorial](https://img.youtube.com/vi/ozuDPmcC1io/0.jpg)](https://aka.ms/CodespacesVideoTutorial "Codespaces Tutorial")
-</details>
+### Writing tests
 
-## 🗃️ PyScript template
+**`upytest` is only _inspired by PyTest_ and is not intended as a replacement.**
 
-This repo is a GitHub template to build a PyScript web application. The goal is
-to give you a template that you can immediately utilize to create your own
-PyScript website through Codespaces.
+Some of the core concepts and capabilities used in `upytest` will be familiar 
+from using PyTest, but the specific API, capabilities and implementation details
+will be very different.
 
-The repo contains the following:
+To create a test suite ensure your test functions are contained in modules
+inside your test directory that start with `test_`. If you want to change this
+pattern for matching test modules pass in a `pattern` argument as a string
+(whose default is currently `pattern="test*.py"`).
 
-* `.devcontainer/devcontainer.json`: Configuration file used by Codespaces to
-  configure Visual Studio Code settings, such as the enabling of additional
-  extensions.
-* `config.json`: the
-  [PyScript configuration](https://docs.pyscript.net/2024.6.1/user-guide/configuration/)
-  used by your application.
-* `index.html`: the
-  [HTML page](https://docs.pyscript.net/2024.6.1/user-guide/first-steps/)
-  used to load your PyScript application.
-* `main.py`: the [Python script](https://pyscript.net/) to run.
-* `mini-coi.js`: a
-  [utility](https://docs.pyscript.net/2024.6.1/user-guide/workers/#http-headers)
-  to ensure all PyScript's features are available.
-* `README.md`: this file (that you're reading right now).
+Inside the test module, test functions are identified by having `test_`
+prepended to their name:
 
-## 🚀 Getting started
+```python
+def test_something():
+    assert True, "This will not fail."
+```
 
-This PyScript project contains everything you need so that you can immediately
-open Codespaces, see it running, and deploy at any point.
+Just like PyTest, use the `assert` statement to verify test expectations. As
+shown above, a string following a comma is used as the value for the resulting
+`AssertionError` should the `assert` fail.
 
-Your development environment is all set for you to start.
+Sometimes you need to skip existing tests. Simply use the `skip` decorator like
+this:
 
-* Visual Studio Code with the [Python plugin](https://code.visualstudio.com/docs/languages/python) enabled.
-* The [LiveServer](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) plugin (so you can view your site).
-* GitHub [copilot support](https://github.com/features/copilot) (if you have it enabled for your account).
+```python
+import upytest
 
-### Create your PyScript app 
 
-1. Create a repository from this template. Use this
-   [create repo link](https://github.com/ntoll/codespaces-project-template-pyscript/generate).
-   Select the repository owner, provide a name, a description if you'd like and
-   if you'd like the new repository to be public or private.
-1. Before creating the Codespace, enable GitHub Copilot for your account.
-1. Navigate to the main page of the newly created repository.
-3. Under the repository name, use the Code drop-down menu, and in the
-   Codespaces tab, select "Create codespace on main".
-4. Wait as GitHub initializes the Codespace.
-5. When complete you will see your Codespace load with a terminal section at
-   the bottom. Codespaces will install all the required extensions in your
-   container. Once the package installs are completed, you'll be able to start
-   editing and start a LiveServer to see your site.
+@upytest.skip("This is my reason for skipping the test")
+def test_skipped():
+    assert False, "This won't fail, because it's skipped!"
+```
 
-## 🏃 Deploy your web application
+Often you need to check a certain exception is raised when a problematic state
+is achieved. To do this use the `raises` context manager like this:
 
-Project includes the setup needed for you to deploy **FREE** to either
-[Azure Static Web Apps](https://azure.microsoft.com/products/app-service/static/?WT.mc_id=academic-79839-sagibbon)
-_**or**_ [GitHub Pages](https://pages.github.com/)</a>. Instructions are
-included below for Azure. The following YouTube video demonstrates how to get
-your Codespace up and running, then deployed to GitHub Pages in under two 
-minutes:
+```python
+import upytest
 
-[![PyScript to Github pages in 2 minutes.](https://img.youtube.com/vi/dmIWFcJ2UTI/0.jpg)](https://www.youtube.com/watch?v=dmIWFcJ2UTI)
 
-### Azure Static Web Apps
+def test_raises_exception():
+    with upytest.raises(ValueError, KeyError):
+        raise ValueError("BOOM!")
+```
 
-[Azure Static Web Apps](https://azure.microsoft.com/products/app-service/static/?WT.mc_id=academic-79839-sagibbon)
-is Microsoft's hosting solution for static sites (or sites that are rendered in
-the user's browser, not on a server) through Azure. This service provides
-additional opportunities to expand your site through Azure Functions,
-authentication, staging versions and more.
+The `raises` context manager requires one or more expected exceptions that
+should be raised while the code within its context is evaluated. If no such
+exceptions are raised, the test fails.
 
-You'll need both Azure and GitHub accounts to deploy your web application. If
-you don't yet have an Azure account you can create it from within during the
-deploy process, or from below links:
+Sometimes you need to perform tasks either before or after a number of tests
+are run. For example, they might be needed to create a certain state, or clean
+up and reset after tests are run. These tasks are achieved by two functions
+called `setup` (run immediately before tests) and `teardown` (run immediately 
+after tests).
 
-* [Create a (no Credit Card required) Azure For Students account](https://azure.microsoft.com/free/students/?WT.mc_id=academic-79839-sagibbon)
-* [Create a new Azure account](https://azure.microsoft.com/?WT.mc_id=academic-79839-sagibbon)
+These functions are entirely optional and should be defined in two possible
+places:
 
-With your project open in Codespaces:
+* In a `conftest.py` file in the root of your test directory. Any `setup` or
+  `teardown` function defined here will be _applied to all tests_.
+* In individual test modules. The `setup` and `teardown` functions in test
+  modules _replace any global versions of these functions defined in 
+  conftest.py_. They only apply to test functions found within the module in
+  which they are defined. If you still need to run the global functions, just 
+  import them and call them from within your test module versions.
 
-1. Click Azure icon in the left sidebar. Log in if you are not already, and if
-   new to Azure, follow the prompts to create your account.
-1. From Azure menu click “+” sign and then “Create Static Web App”.
-1. If you are not logged into GitHub you will be prompted to log in. If you
-   have any pending file changes you will then be prompted to commit those
-   changes.
-1. Set your application information when prompted:
-    1. **Region**: pick the one closest to you
-    1. **Project structure**: select "React"
-    1. **Location of application code**: `/`
-    1. **Build location**: `dist`
-1. When complete you will see a notification at the bottom of your screen, and
-   a new GitHub Action workflow will be added to your project. If you click
-   “Open Action in GitHub” you will see the action that was created for you,
-   and it is currently running.
-![Azure Static Web App deploy](https://github.com/education/codespaces-project-template-js/raw/main/__images__/swa-deploy.gif "Azure Static Web App deploy")
-1. To view the status of your deployment, find your Static Web App resource in
-   the Azure tab in the VS Code left side bar.
-1. Once deployment is complete, you can view your brand new new publicly
-   accessible application by right clicking on your Static Web App resource and
-   selecting "Browse Site".
+All test functions along with `setup` and `teardown` can be awaitable /
+asynchronous. 
 
-> **Issues?** When creating your Static Web app, if you are prompted to select
-> an Azure subscription and are not able to select a subscription, check the
-> "Accounts" tab in VS Code. Make sure to choose the "Grant access to ..."
-> options if those options appear. Should you receive the error-message
-> "RepositoryToken is invalid. ..." switch to Visual Studio Code for the Web
-> (vscode.dev) and repeat the steps there.
+All these features are demonstrated within the test modules in the `tests`
+directory of this project.
 
-> 🤩 **Bonus**: [Setup a custom domain for your Azure Static Web App](https://learn.microsoft.com/en-us/shows/azure-tips-and-tricks-static-web-apps/how-to-set-up-a-custom-domain-name-in-azure-static-web-apps-10-of-16--azure-tips-and-tricks-static-w/?WT.mc_id=academic-79839-sagibbon)
+### Test output
 
-## 🔎 Found an issue or have an idea for improvement?
-Help us make this template repository better by [letting us know and opening an issue!](/../../issues/new).
+Test output tries to be informative, indicating the time taken, the number of
+tests, the number of pass, fails and skips along with tracebacks for failures.
+
+When outputting a test run a `.` represents a passing test, an `F` a failure
+and `S` a skipped test.
+
+The output for the test suite for this module is a good example of all the
+different sorts of information you may see:
+
+```
+Using conftest.py for global setup and teardown.
+Found 2 test module[s]. Running 18 test[s].
+
+.S.FFFF...F..SF.FF
+================================= FAILURES =================================
+
+./tests/test_stuff.py::test_does_not_raise_exception
+Traceback (most recent call last):
+  File "upytest.py", line 91, in run
+  File "test_stuff.py", line 24, in test_does_not_raise_exception
+  File "upytest.py", line 229, in __exit__
+AssertionError: Did not raise expected exception.
+
+
+./tests/test_stuff.py::test_fails
+Traceback (most recent call last):
+  File "upytest.py", line 91, in run
+  File "test_stuff.py", line 14, in test_fails
+AssertionError: This test fails
+
+
+./tests/test_stuff.py::test_async_fails
+Traceback (most recent call last):
+  File "upytest.py", line 89, in run
+  File "test_stuff.py", line 37, in test_async_fails
+AssertionError: This async test fails.
+
+
+./tests/test_stuff.py::test_async_does_not_raise_exception
+Traceback (most recent call last):
+  File "upytest.py", line 89, in run
+  File "test_stuff.py", line 47, in test_async_does_not_raise_exception
+  File "upytest.py", line 229, in __exit__
+AssertionError: Did not raise expected exception.
+
+
+./tests/test_with_setup_teardown.py::test_async_does_not_raise_exception
+Traceback (most recent call last):
+  File "upytest.py", line 89, in run
+  File "test_with_setup_teardown.py", line 56, in test_async_does_not_raise_exception
+  File "upytest.py", line 229, in __exit__
+AssertionError: Did not raise expected exception.
+
+
+./tests/test_with_setup_teardown.py::test_does_not_raise_exception
+Traceback (most recent call last):
+  File "upytest.py", line 91, in run
+  File "test_with_setup_teardown.py", line 33, in test_does_not_raise_exception
+  File "upytest.py", line 229, in __exit__
+AssertionError: Did not raise expected exception.
+
+
+./tests/test_with_setup_teardown.py::test_async_fails
+Traceback (most recent call last):
+  File "upytest.py", line 89, in run
+  File "test_with_setup_teardown.py", line 46, in test_async_fails
+AssertionError: This async test fails.
+
+
+./tests/test_with_setup_teardown.py::test_fails
+Traceback (most recent call last):
+  File "upytest.py", line 91, in run
+  File "test_with_setup_teardown.py", line 23, in test_fails
+AssertionError: This test fails.
+
+========================= short test summary info ==========================
+8 failed, 2 skipped, 8 passed in 0.00 seconds
+```
+
+## Developer setup
+
+This is easy:
+
+1. Clone the project.
+2. Start a local web server: `python -m http.server`
+3. Point your browser at http://localhost:8000/
+4. Change code and refresh your browser to check your changes.
+5. **DO NOT CREATE A NEW FEATURE WITHOUT FIRST CREATING AN ISSUE FOR IT IN WHICH
+   YOU PROPOSE YOUR CHANGE**. (We want to avoid a situation where you work hard
+   on something that is ultimately rejected by the maintainers.)
+6. Given all the above, pull requests are welcome and greatly appreciated.
+
+We expect all contributors to abide by the spirit of our
+[code of conduct](./CODE_OF_CONDUCT.md).
+
+## Testing uPyTest
+
+See the content of the `tests` directory in this repository. To run the test
+suite, just follow steps 1, 2 and 3 in the developer setup section.
+
+## License
+
+Copyright (c) 2024 Nicholas H.Tollervey
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

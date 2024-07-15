@@ -1,1 +1,4 @@
-print("Hello, world!")
+import upytest
+
+
+await upytest.run("./tests")
