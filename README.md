@@ -137,88 +137,16 @@ different sorts of information you may see:
 
 ```
 Using conftest.py for global setup and teardown.
-Found 2 test module[s]. Running 22 test[s].
+Found 2 test module[s]. Running 14 test[s].
 
-F.FF.SFF..FF.FS.FF..FF
+.FF.SF.F..F.SF
 ================================= FAILURES =================================
-
-./tests/test_with_setup_teardown.py::test_async_fails
-Traceback (most recent call last):
-  File "upytest.py", line 89, in run
-  File "test_with_setup_teardown.py", line 51, in test_async_fails
-AssertionError: This async test fails.
-
-
-./tests/test_with_setup_teardown.py::test_async_does_not_raise_exception
-Traceback (most recent call last):
-  File "upytest.py", line 89, in run
-  File "test_with_setup_teardown.py", line 61, in test_async_does_not_raise_exception
-  File "upytest.py", line 238, in __exit__
-AssertionError: Did not raise expected exception. Expected ValueError; but got None.
-
-
-./tests/test_with_setup_teardown.py::test_async_does_not_raise_expected_exception
-Traceback (most recent call last):
-  File "upytest.py", line 89, in run
-  File "test_with_setup_teardown.py", line 66, in test_async_does_not_raise_expected_exception
-  File "upytest.py", line 238, in __exit__
-AssertionError: Did not raise expected exception. Expected ValueError, AssertionError; but got 
-TypeError.
-
-
-./tests/test_with_setup_teardown.py::test_does_not_raise_exception
-Traceback (most recent call last):
-  File "upytest.py", line 91, in run
-  File "test_with_setup_teardown.py", line 33, in test_does_not_raise_exception
-  File "upytest.py", line 238, in __exit__
-AssertionError: Did not raise expected exception. Expected ValueError; but got None.
-
-
-./tests/test_with_setup_teardown.py::test_does_not_raise_expected_exception
-Traceback (most recent call last):
-  File "upytest.py", line 91, in run
-  File "test_with_setup_teardown.py", line 38, in test_does_not_raise_expected_exception
-  File "upytest.py", line 238, in __exit__
-AssertionError: Did not raise expected exception. Expected ValueError, AssertionError; but got 
-TypeError.
-
-
-./tests/test_with_setup_teardown.py::test_fails
-Traceback (most recent call last):
-  File "upytest.py", line 91, in run
-  File "test_with_setup_teardown.py", line 23, in test_fails
-AssertionError: This test fails.
-
 
 ./tests/test_stuff.py::test_async_does_not_raise_expected_exception
 Traceback (most recent call last):
   File "upytest.py", line 89, in run
-  File "test_stuff.py", line 57, in test_async_does_not_raise_expected_exception
-  File "upytest.py", line 238, in __exit__
-AssertionError: Did not raise expected exception. Expected ValueError, AssertionError; but got 
-TypeError.
-
-
-./tests/test_stuff.py::test_async_fails
-Traceback (most recent call last):
-  File "upytest.py", line 89, in run
-  File "test_stuff.py", line 42, in test_async_fails
-AssertionError: This async test fails.
-
-
-./tests/test_stuff.py::test_does_not_raise_exception
-Traceback (most recent call last):
-  File "upytest.py", line 91, in run
-  File "test_stuff.py", line 24, in test_does_not_raise_exception
-  File "upytest.py", line 238, in __exit__
-AssertionError: Did not raise expected exception. Expected ValueError; but got None.
-
-
-./tests/test_stuff.py::test_does_not_raise_expected_exception
-Traceback (most recent call last):
-  File "upytest.py", line 91, in run
-  File "test_stuff.py", line 29, in test_does_not_raise_expected_exception
-  File "upytest.py", line 238, in __exit__
+  File "test_stuff.py", line 103, in test_async_does_not_raise_expected_exception
+  File "upytest.py", line 240, in __exit__
 AssertionError: Did not raise expected exception. Expected ValueError, AssertionError; but got 
 TypeError.
 
@@ -226,19 +154,43 @@ TypeError.
 ./tests/test_stuff.py::test_async_does_not_raise_exception
 Traceback (most recent call last):
   File "upytest.py", line 89, in run
-  File "test_stuff.py", line 52, in test_async_does_not_raise_exception
-  File "upytest.py", line 238, in __exit__
+  File "test_stuff.py", line 97, in test_async_does_not_raise_exception
+  File "upytest.py", line 240, in __exit__
 AssertionError: Did not raise expected exception. Expected ValueError; but got None.
 
 
 ./tests/test_stuff.py::test_fails
 Traceback (most recent call last):
   File "upytest.py", line 91, in run
-  File "test_stuff.py", line 14, in test_fails
+  File "test_stuff.py", line 29, in test_fails
 AssertionError: This test fails
 
+
+./tests/test_stuff.py::test_does_not_raise_expected_exception
+Traceback (most recent call last):
+  File "upytest.py", line 91, in run
+  File "test_stuff.py", line 67, in test_does_not_raise_expected_exception
+  File "upytest.py", line 240, in __exit__
+AssertionError: Did not raise expected exception. Expected ValueError, AssertionError; but got 
+TypeError.
+
+
+./tests/test_stuff.py::test_async_fails
+Traceback (most recent call last):
+  File "upytest.py", line 89, in run
+  File "test_stuff.py", line 85, in test_async_fails
+AssertionError: This async test fails.
+
+
+./tests/test_stuff.py::test_does_not_raise_exception
+Traceback (most recent call last):
+  File "upytest.py", line 91, in run
+  File "test_stuff.py", line 59, in test_does_not_raise_exception
+  File "upytest.py", line 240, in __exit__
+AssertionError: Did not raise expected exception. Expected ValueError; but got None.
+
 ========================= short test summary info ==========================
-12 failed, 2 skipped, 8 passed in 0.01 seconds
+6 failed, 2 skipped, 6 passed in 1.02 seconds
 ```
 
 ## Developer setup
