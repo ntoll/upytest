@@ -33,6 +33,11 @@ def test_does_not_raise_exception():
         pass
 
 
+def test_does_not_raise_expected_exception():
+    with upytest.raises(ValueError, AssertionError):
+        raise TypeError("This is a TypeError")
+
+
 @upytest.skip("This async test will be skipped")
 async def test_async_passes():
     assert False  # This will not be executed.
@@ -54,3 +59,8 @@ async def test_async_raises_exception():
 async def test_async_does_not_raise_exception():
     with upytest.raises(ValueError):
         pass
+
+
+async def test_async_does_not_raise_expected_exception():
+    with upytest.raises(ValueError, AssertionError):
+        raise TypeError("This is a TypeError")

@@ -225,8 +225,17 @@ class raises:
     def __exit__(self, ex_type, ex_value, ex_tb):
         # Check the exception type.
         if ex_type not in self.expected_exceptions:
-            # No such expected exception, so raise AssertionError.
-            raise AssertionError("Did not raise expected exception.")
+            # No such expected exception, so raise AssertionError with a
+            # helpful message.
+            message = "Did not raise expected exception."
+            expected = ", ".join(
+                [str(ex.__name__) for ex in self.expected_exceptions]
+            )
+            if ex_type:
+                message += f" Expected {expected}; but got {ex_type.__name__}."
+            else:
+                message += f" Expected {expected}; but got None."
+            raise AssertionError(message)
         self.exception = ex_value
         self.traceback = ex_tb
         return True  # Suppress the expected exception.
