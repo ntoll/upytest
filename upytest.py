@@ -216,7 +216,7 @@ class raises:
         # Check the args are all children of BaseException.
         for ex in expected_exceptions:
             if not issubclass(ex, BaseException):
-                raise ValueError(f"{ex} is not an Exception.")
+                raise TypeError(f"{ex} is not an Exception.")
         self.expected_exceptions = expected_exceptions
         self.exception = None
         self.traceback = None
