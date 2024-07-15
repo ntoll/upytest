@@ -181,7 +181,9 @@ def discover(start_dir, pattern, setup=None, teardown=None):
     """
     Return a list of TestModule instances representing Python modules
     recursively found in the start_dir and whose name matches the pattern for
-    identifying test modules.
+    identifying test modules. If global setup and teardown functions are
+    provided, these will be used for each test module unless overridden by
+    module-specific setup and teardown functions.
     """
     result = []
     for module_match in Path(start_dir).rglob(pattern):
