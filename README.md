@@ -162,7 +162,8 @@ Traceback (most recent call last):
   File "upytest.py", line 89, in run
   File "test_with_setup_teardown.py", line 66, in test_async_does_not_raise_expected_exception
   File "upytest.py", line 238, in __exit__
-AssertionError: Did not raise expected exception. Expected ValueError, AssertionError; but got TypeError.
+AssertionError: Did not raise expected exception. Expected ValueError, AssertionError; but got 
+TypeError.
 
 
 ./tests/test_with_setup_teardown.py::test_does_not_raise_exception
@@ -178,7 +179,8 @@ Traceback (most recent call last):
   File "upytest.py", line 91, in run
   File "test_with_setup_teardown.py", line 38, in test_does_not_raise_expected_exception
   File "upytest.py", line 238, in __exit__
-AssertionError: Did not raise expected exception. Expected ValueError, AssertionError; but got TypeError.
+AssertionError: Did not raise expected exception. Expected ValueError, AssertionError; but got 
+TypeError.
 
 
 ./tests/test_with_setup_teardown.py::test_fails
@@ -193,7 +195,8 @@ Traceback (most recent call last):
   File "upytest.py", line 89, in run
   File "test_stuff.py", line 57, in test_async_does_not_raise_expected_exception
   File "upytest.py", line 238, in __exit__
-AssertionError: Did not raise expected exception. Expected ValueError, AssertionError; but got TypeError.
+AssertionError: Did not raise expected exception. Expected ValueError, AssertionError; but got 
+TypeError.
 
 
 ./tests/test_stuff.py::test_async_fails
@@ -216,7 +219,8 @@ Traceback (most recent call last):
   File "upytest.py", line 91, in run
   File "test_stuff.py", line 29, in test_does_not_raise_expected_exception
   File "upytest.py", line 238, in __exit__
-AssertionError: Did not raise expected exception. Expected ValueError, AssertionError; but got TypeError.
+AssertionError: Did not raise expected exception. Expected ValueError, AssertionError; but got 
+TypeError.
 
 
 ./tests/test_stuff.py::test_async_does_not_raise_exception
