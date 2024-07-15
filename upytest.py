@@ -154,8 +154,8 @@ class TestModule:
         """
         Run each TestCase instance for this module. If a setup or teardown
         exists, these will be evaluated immediately before and after the
-        TestCase is run. Yields each test case as it is run to allow for an
-        async for loop to be used.
+        TestCase is run. Print a dot for each passing test, an F for each
+        failing test, and an S for each skipped test.
         """
         for test_case in self.tests:
             if self.setup:
