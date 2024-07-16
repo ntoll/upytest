@@ -70,15 +70,20 @@ class TestCase:
     """
 
     def __init__(self, test_function, module_name, test_name):
+        """
+        A TestCase is instantiated with a callable test_function, the name of 
+        the module containing the test, and the name of the test within the
+        module.
+        """
         self.test_function = test_function
         self.module_name = module_name
         self.test_name = test_name
-        self.status = PENDING
-        self.traceback = None
+        self.status = PENDING  # the initial state of the test.
+        self.traceback = None  # to contain details of any failure.
 
     async def run(self):
         """
-        Run the test function and set the status and error attributes, as
+        Run the test function and set the status and traceback attributes, as
         required.
         """
         if self.test_function in _SKIPPED_TESTS:
@@ -92,10 +97,11 @@ class TestCase:
             self.status = PASS
         except Exception as ex:
             self.status = FAIL
-            traceback = io.StringIO()
-            sys.print_exception(ex, traceback)
-            traceback.seek(0)
-            self.traceback = traceback.read()
+            # Gather a traceback from the caught exception.
+            traceback_data = io.StringIO()
+            sys.print_exception(ex, traceback_data)
+            traceback_data.seek(0)
+            self.traceback = traceback_data.read()
 
 
 class TestModule:
@@ -106,10 +112,12 @@ class TestModule:
     def __init__(self, path, module_name, module, setup=None, teardown=None):
         """
         A TestModule is instantiated with a path to its location on the
-        filesystem, the name of the module, and the Python module itself.
-        Optional setup and teardown callables may also be supplied. If the
-        module contains valid setup/teardown functions, these will be used
-        instead.
+        filesystem, the name of the module, and an object representing the 
+        Python module itself.
+
+        Optional global setup and teardown callables may also be supplied. If 
+        the module already contains valid setup/teardown functions, these will 
+        be used instead.
         """
         self.path = path
         self.module_name = module_name
@@ -154,8 +162,10 @@ class TestModule:
         """
         Run each TestCase instance for this module. If a setup or teardown
         exists, these will be evaluated immediately before and after the
-        TestCase is run. Print a dot for each passing test, an F for each
-        failing test, and an S for each skipped test.
+        TestCase is run. 
+        
+        Print a dot for each passing test, an F for each failing test, and an S
+        for each skipped test.
         """
         for test_case in self.tests:
             if self.setup:
@@ -181,9 +191,11 @@ def discover(start_dir, pattern, setup=None, teardown=None):
     """
     Return a list of TestModule instances representing Python modules
     recursively found in the start_dir and whose name matches the pattern for
-    identifying test modules. If global setup and teardown functions are
-    provided, these will be used for each test module unless overridden by
-    module-specific setup and teardown functions.
+    identifying test modules. 
+    
+    If global setup and teardown functions are provided, these will be used for
+    each test module unless overridden by module-specific setup and teardown 
+    functions.
     """
     result = []
     for module_match in Path(start_dir).rglob(pattern):
@@ -260,10 +272,11 @@ def skip(reason=""):
 async def run(start_dir=".", pattern="test_*.py"):
     """
     Run the test suite given a start_dir and pattern for identifying test
-    modules. If there is a conftest.py file in the start_dir, it will be
-    imported for any global setup and teardown functions to use. These
-    setup and teardown functions can be overridden in the individual test
-    modules.
+    modules. 
+    
+    If there is a conftest.py file in the start_dir, it will be imported for
+    any global setup and teardown functions to use. These setup and teardown
+    functions can be overridden in the individual test modules.
     """
     setup = None
     teardown = None
