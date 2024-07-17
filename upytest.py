@@ -281,7 +281,7 @@ async def run(start_dir=".", pattern="test_*.py"):
     setup = None
     teardown = None
     conftest = Path(start_dir) / "conftest.py"
-    if conftest.exists():
+    if os.path.exists(str(conftest)):
         print("Using conftest.py for global setup and teardown.")
         cwd = os.path.abspath(os.getcwd())
         os.chdir(os.path.abspath(start_dir))
