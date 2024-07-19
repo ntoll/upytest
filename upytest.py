@@ -64,15 +64,6 @@ def is_awaitable(obj):
     return inspect.isgeneratorfunction(obj)
 
 
-def filepath_to_dotted_path(filepath):
-    """
-    Convert a file path to a dotted (module) path.
-    """
-    if filepath.endswith(".py"):
-        filepath = filepath[:-3]
-    return ".".join([item for item in filepath.split("/") if item != "."])
-
-
 class TestCase:
     """
     Represents an individual test to run.
@@ -118,18 +109,16 @@ class TestModule:
     Represents a module containing tests.
     """
 
-    def __init__(self, path, module_name, module, setup=None, teardown=None):
+    def __init__(self, path, module, setup=None, teardown=None):
         """
         A TestModule is instantiated with a path to its location on the
-        filesystem, the name of the module, and an object representing the
-        Python module itself.
+        filesystem and an object representing the Python module itself.
 
         Optional global setup and teardown callables may also be supplied. If
         the module already contains valid setup/teardown functions, these will
         be used instead.
         """
         self.path = path
-        self.module_name = module_name
         self.module = module
         self._setup = setup
         self._teardown = teardown
@@ -208,14 +197,8 @@ def discover(start_dir, pattern, setup=None, teardown=None):
     """
     result = []
     for module_path in Path(start_dir).rglob(pattern):
-        module_file = os.path.split(module_path)[-1]
-        module_name = module_file[:-3]  # Remove the ".py" extension.
-        module_dotted_path = filepath_to_dotted_path(module_path)
-        module_import = __import__(module_dotted_path)
-        module_instance = getattr(module_import, module_name)
-        module = TestModule(
-            module_path, module_name, module_instance, setup, teardown
-        )
+        module_instance = __import__(module_path[:-3])  # Remove ".py"
+        module = TestModule(module_path, module_instance, setup, teardown)
         result.append(module)
     return result
 
@@ -290,8 +273,7 @@ async def run(start_dir=".", pattern="test_*.py"):
     conftest = os.path.join(start_dir, "conftest.py")
     if os.path.exists(conftest):
         print("Using conftest.py for global setup and teardown.")
-        dotted_conftest = filepath_to_dotted_path(conftest)
-        conftest_instance = __import__(dotted_conftest).conftest
+        conftest_instance = __import__(conftest[:-3])  # Remove ".py"
         setup = (
             conftest_instance.setup
             if hasattr(conftest_instance, "setup")
