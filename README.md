@@ -1,8 +1,9 @@
 # uPyTest (MicroPytest) 🔬🐍✔️
 
 A small and very limited module for very simple [PyTest](https://pytest.org) 
-inspired tests to run in the [MicroPython](https://micropython.org/) runtime
-within [PyScript](https://pyscript.net/). 
+inspired tests to run in the [MicroPython](https://micropython.org/) and
+[Pyodide](https://pyodide.org/) interpreters within 
+[PyScript](https://pyscript.net/). 
 
 It currently only implements naive versions of:
 
@@ -14,10 +15,24 @@ It currently only implements naive versions of:
 * A `skip("reason")` decorator for skipping test functions.
 * Checks for expected exceptions via a `raises` context manager.
 * Synchronous and asynchronous test cases.
+* Works well with [uMock](https://github.com/ntoll/umock).
+
+There are two major reasons this project exists:
+
+1. MicroPython doesn't have a test framework like PyTest, and folks want to
+   test PyScript code running in MicroPython.
+2. Using the same test framework with both MicroPython and Pyodide will ensure
+   the test suite can exercise your code running on both interpreters (and
+   perhaps highlight places where behaviour differs).
+
+Of course, **you should write tests for your code**! If only because it means
+you'll be able to make changes in the future with confidence. The aim of
+`upytest`` is to make this is simple as possible, in a way that is familiar to
+those who use PyTest, when using PyScript.
 
 ## Usage
 
-**This module is for use with MicroPython within PyScript.**
+**This module is for use within PyScript.**
 
 ### Setup
 
@@ -30,8 +45,8 @@ It currently only implements naive versions of:
    `config.json` in this repository demonstrates how to copy over the content
    of the `tests` directory found in this repository.
 3. In your `main.py` (or whatever you call your main Python script), simply
-   import upytest and await the `run` method while passing in the test 
-   directory:
+   `import upytest` and await the `run` method while passing in a string
+   containing the path to the test directory:
    ```python
    import upytest
 
@@ -40,13 +55,15 @@ It currently only implements naive versions of:
    ```
    (This is demonstrated in the `main.py` file in this repository.)
 4. In your `index.html` make sure you use the `async` and `terminal` attributes
-   when referencing your MicroPython script (as in the `index.html` file in
+   when referencing your Python script (as in the `index.html` file in
    this repository):
    ```html
    <script type="mpy" src="./main.py" config="./config.json" terminal async></script>
    ```
+   You should be able to use the `type` attribute of `"mpy"` (for MicroPython)
+   and `"py"` (for Pyodide) interchangeably.
 
-Simply point your browser at your `index.html` and your should see the test
+Finally, point your browser at your `index.html` and your should see the test
 suite run.
 
 ### Writing tests
@@ -54,13 +71,14 @@ suite run.
 **`upytest` is only _inspired by PyTest_ and is not intended as a replacement.**
 
 Some of the core concepts and capabilities used in `upytest` will be familiar 
-from using PyTest, but the specific API, capabilities and implementation details
-will be very different.
+from using PyTest, but the specific API, capabilities and implementation
+details _will be very different_.
 
-To create a test suite ensure your test functions are contained in modules
-inside your test directory that start with `test_`. If you want to change this
-pattern for matching test modules pass in a `pattern` argument as a string to
-the `upytest.run` method (whose default is currently `pattern="test*.py"`).
+To create a test suite ensure your test functions are contained in modules,
+whose names start with `test_`, found inside your `test` directory. If you want
+to change this pattern for matching test modules pass in a `pattern` argument
+as a string to the `upytest.run` method (whose default is currently
+`pattern="test*.py"`).
 
 Inside the test module, test functions are identified by having `test_`
 prepended to their name:
@@ -112,15 +130,16 @@ These functions are entirely optional and should be defined in two possible
 places:
 
 * In a `conftest.py` file in the root of your test directory. Any `setup` or
-  `teardown` function defined here will be _applied to all tests_.
+  `teardown` function defined here will be _applied to all tests_, unless
+  you override these functions...
 * In individual test modules. The `setup` and `teardown` functions in test
   modules _replace any global versions of these functions defined in 
-  conftest.py_. They only apply to test functions found within the module in
+  conftest.py_. They only apply to _test functions found within the module_ in
   which they are defined. If you still need to run the global functions, just 
   import them and call them from within your test module versions.
 
 All test functions along with `setup` and `teardown` can be awaitable /
-asynchronous. 
+asynchronous.
 
 All these features are demonstrated within the test modules in the `tests`
 directory of this project.
@@ -128,7 +147,14 @@ directory of this project.
 ### Test output
 
 Test output tries to be informative, indicating the time taken, the number of
-tests, the number of pass, fails and skips along with tracebacks for failures.
+tests, the number of passes, fails and skips along with tracebacks for
+failures.
+
+Due to the small nature of MicroPython, the information from the traceback for
+failing tests may not appear as comprehensive as the information you may be
+used to see after a run of classic PyTest. Nevertheless, line numbers and the
+call stack are included to provide you with enough information to see what has
+failed, and where.
 
 When outputting a test run a `.` represents a passing test, an `F` a failure
 and `S` a skipped test.

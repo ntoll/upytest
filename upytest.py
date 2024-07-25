@@ -32,6 +32,13 @@ import inspect
 import time
 from pathlib import Path
 
+try:
+    # Pyodide.
+    from traceback import print_exception
+except ImportError:
+    # MicroPython
+    from sys import print_exception
+
 
 __all__ = [
     "discover",
@@ -39,6 +46,10 @@ __all__ = [
     "skip",
     "run",
 ]
+
+
+#: A flag to show if MicroPython is the current Python interpreter.
+is_micropython = "micropython" in sys.version.lower()
 
 
 #: To contain references to any skipped tests.
@@ -61,7 +72,35 @@ def is_awaitable(obj):
     Returns a boolean indication if the passed in obj is an awaitable
     function. (MicroPython treats awaitables as generator functions.)
     """
-    return inspect.isgeneratorfunction(obj)
+    if is_micropython:
+        return inspect.isgeneratorfunction(obj)
+    return inspect.iscoroutinefunction(obj)
+
+
+def import_module(module_path):
+    """
+    Import a module from a given file path, in a way that works with both
+    MicroPython and Pyodide.
+    """
+    dotted_path = str(module_path).replace("/", ".").replace(".py", "")
+    dotted_path = dotted_path.lstrip(".")
+    module = __import__(dotted_path)
+    for part in dotted_path.split(".")[1:]:
+        module = getattr(module, part)
+    return module
+
+
+def parse_traceback_from_exception(ex):
+    """
+    Parse the traceback from an exception object.
+    """
+    traceback_data = io.StringIO()
+    if is_micropython:
+        print_exception(ex, traceback_data)
+    else:
+        print_exception(ex, file=traceback_data)
+    traceback_data.seek(0)
+    return traceback_data.read()
 
 
 class TestCase:
@@ -97,11 +136,7 @@ class TestCase:
             self.status = PASS
         except Exception as ex:
             self.status = FAIL
-            # Gather a traceback from the caught exception.
-            traceback_data = io.StringIO()
-            sys.print_exception(ex, traceback_data)
-            traceback_data.seek(0)
-            self.traceback = traceback_data.read()
+            self.traceback = parse_traceback_from_exception(ex)
 
 
 class TestModule:
@@ -197,7 +232,7 @@ def discover(start_dir, pattern, setup=None, teardown=None):
     """
     result = []
     for module_path in Path(start_dir).rglob(pattern):
-        module_instance = __import__(module_path[:-3])  # Remove ".py"
+        module_instance = import_module(module_path)
         module = TestModule(module_path, module_instance, setup, teardown)
         result.append(module)
     return result
@@ -273,7 +308,7 @@ async def run(start_dir=".", pattern="test_*.py"):
     conftest = os.path.join(start_dir, "conftest.py")
     if os.path.exists(conftest):
         print("Using conftest.py for global setup and teardown.")
-        conftest_instance = __import__(conftest[:-3])  # Remove ".py"
+        conftest_instance = import_module(conftest)
         setup = (
             conftest_instance.setup
             if hasattr(conftest_instance, "setup")

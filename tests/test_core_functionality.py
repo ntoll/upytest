@@ -25,7 +25,7 @@ def test_fails():
     """
     A test function that fails with a false assertion.
     """
-    assert False, "This test fails"
+    assert False, "This test will fail"
 
 
 def test_raises_expects_base_exception_children():
