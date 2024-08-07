@@ -246,7 +246,8 @@ def gather_conftest_functions(conftest_path, target):
     Import the conftest.py module from the given Path instance, and return the
     global setup and teardown functions for the target (if they exist).
     """
-    if conftest_path.exists():
+    conftest_path = str(conftest_path)
+    if os.path.exists(conftest_path):
         print(
             f"Using \033[1m{conftest_path}\033[0m for global setup and teardown in \033[1m{target}\033[0m."
         )
