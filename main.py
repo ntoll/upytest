@@ -32,12 +32,12 @@ expected_results = {
     "result_all": {
         "passes": 6,
         "fails": 6,
-        "skipped": 2,
+        "skipped": 4,
     },
     "result_module": {
         "passes": 5,
         "fails": 6,
-        "skipped": 2,
+        "skipped": 4,
     },
     "result_specific": {
         "passes": 1,

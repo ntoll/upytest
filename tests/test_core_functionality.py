@@ -14,6 +14,24 @@ def test_skipped():
     assert False  # This will not be executed.
 
 
+@upytest.skip("This test will be skipped with a when condition", when=True)
+def test_when_skipped():
+    """
+    Test functions decorated with `@upytest.skip` and a truthy when condition
+    will be skipped.
+    """
+    assert False
+
+
+@upytest.skip("This test will NOT be skipped with a False-y when", when=False)
+def test_when_not_skipped_passes():
+    """
+    Test functions decorated with `@upytest.skip` and a falsey when condition
+    will NOT be skipped.
+    """
+    assert True, "This test passes"
+
+
 def test_passes():
     """
     A test function that passes with a true assertion.
@@ -74,6 +92,15 @@ def test_does_not_raise_expected_exception_fails():
 async def test_async_skipped():
     assert False  # This will not be executed.
 
+
+@upytest.skip("This test will be skipped with a when condition", when=True)
+async def test_async_when_skipped():
+    assert False  # This will not be executed.
+
+
+@upytest.skip("This test will NOT be skipped with a False-y when", when=False)
+async def test_async_when_not_skipped_passes():
+    assert True, "This async test passes"
 
 async def test_async_passes():
     assert True, "This async test passes."

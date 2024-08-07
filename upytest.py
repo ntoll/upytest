@@ -348,16 +348,30 @@ class raises:
         return True  # Suppress the expected exception.
 
 
-def skip(reason=""):
+def skip(reason="", when=True):
     """
     A decorator to indicate the decorated test function should be skipped
     (with optional reason).
+
+    The test will only be skipped if the optional when argument is True (the 
+    default value is True). 
+    
+    If when is False, the decorated test will be run. This is useful
+    for conditional skipping of tests. E.g.:
+    
+    @skip("Skip this if using MicroPython", when=is_micropython)
+    def test_something():
+        assert 1 == 1
     """
 
-    def decorator(func):
-        global _SKIPPED_TESTS
-        _SKIPPED_TESTS.append(func)
-        return func
+    if when:
+        def decorator(func):
+            global _SKIPPED_TESTS
+            _SKIPPED_TESTS.append(func)
+            return func
+    else:
+        def decorator(func):
+            return func()
 
     return decorator
 

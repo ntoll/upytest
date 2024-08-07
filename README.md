@@ -121,6 +121,20 @@ def test_skipped():
     assert False, "This won't fail, because it's skipped!"
 ```
 
+The `skip` decorator takes an optional string to describe why the test function
+is to be skipped. It also takes an optional `when` argument whose default value
+is `True`. If `when` is false-y, the decorated test **will NOT be skipped**. 
+This is useful for conditional skipping of tests. E.g.:
+
+```python
+import upytest
+
+
+@skip("Skip this if using MicroPython", when=upytest.is_micropython)
+def test_something():
+   assert 1 == 1  # Only asserted if using Pyodide.
+```
+
 Often you need to check a certain exception is raised when a problematic state
 is achieved. To do this use the `raises` context manager like this:
 
