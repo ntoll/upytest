@@ -16,9 +16,10 @@ async def teardown():
     window.console.log("Teardown from async teardown function in module")
 
 
-def test_with_local_setup_teardown():
+def test_with_local_setup_teardown_passes():
     """
-    A test function that will use the local setup and teardown functions.
+    A test function that will use the local setup and teardown functions. This
+    test should pass.
     """
     assert True, "This test passes"
     window.console.log("Test function with local setup and teardown")

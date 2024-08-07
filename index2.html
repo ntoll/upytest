@@ -9,16 +9,21 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
     <!-- PyScript CSS -->
-    <link rel="stylesheet" href="https://pyscript.net/releases/2024.6.1/core.css">
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.8.2/core.css">
 
     <!-- This script tag bootstraps PyScript -->
-    <script type="module" src="https://pyscript.net/releases/2024.6.1/core.js"></script>
+    <script type="module" src="https://pyscript.net/releases/2024.8.2/core.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+        }
+    </style>
 </head>
 <body>
     <h1>MicroPyTest test suite (Pyodide)</h1>
-    <p>Expecting 6 failed, 2 skipped, 6 passed. (<a href="./index.html">MicroPython version</a>)</p>
+    <p>(<a href="./index.html">MicroPython version</a>)</p>
     <script type="py" src="./main.py" config="./config.json" terminal async></script>
-    <p>Check browser console for <code>setup</code> and <code>teardown</code>
+    <p>Check browser console for expected <code>setup</code> and <code>teardown</code>
     output.</p>
 </body>
 </html>

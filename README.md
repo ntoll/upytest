@@ -27,38 +27,55 @@ There are two major reasons this project exists:
 
 Of course, **you should write tests for your code**! If only because it means
 you'll be able to make changes in the future with confidence. The aim of
-`upytest`` is to make this is simple as possible, in a way that is familiar to
+`upytest` is to make this is simple as possible, in a way that is familiar to
 those who use PyTest, when using PyScript.
 
 ## Usage
 
 **This module is for use within PyScript.**
 
-### Setup
+### Setup/ Run tests
 
 1. Ensure the `upytest.py` file is in your Python path. You may need to copy
    this over using the 
-   [files settings](https://docs.pyscript.net/2024.7.1/user-guide/configuration/#files). 
+   [files settings](https://docs.pyscript.net/2024.8.2/user-guide/configuration/#files). 
    (See the `config.json` file in this repository for an example of this in 
    action.)
 2. Create and copy over your tests. Once again use the files settings, and the
    `config.json` in this repository demonstrates how to copy over the content
    of the `tests` directory found in this repository.
-3. In your `main.py` (or whatever you call your main Python script), simply
-   `import upytest` and await the `run` method while passing in a string
-   containing the path to the test directory:
+3. In your `main.py` (or whatever you call your Python script for starting the
+   tests), simply `import upytest` and await the `run` method while passing in
+   one or more strings indicating the tests to run:
    ```python
    import upytest
 
 
-   await upytest.run("./tests")
+   results = await upytest.run("./tests")
    ```
    (This is demonstrated in the `main.py` file in this repository.)
-4. In your `index.html` make sure you use the `async` and `terminal` attributes
+4. The specification may be simply a string describing the directory in
+   which to start looking for test modules (e.g. `"./tests"`), or strings
+   representing the names of specific test modules / tests to run (of the
+   form: "module_path" or "module_path::test_function"; e.g.
+   `"tests/test_module.py"` or `"tests/test_module.py::test_stuff"`).
+5. If a named `pattern` argument is provided, it will be used to match test
+   modules in the specification for target directories. The default pattern is
+   "test_*.py".
+6. If there is a `conftest.py` file in any of the specified directories
+   containing a test module, it will be imported for any global `setup` and
+   `teardown` functions to use for modules found within that directory. These
+   `setup` and `teardown` functions can be overridden in the individual test
+   modules.
+7. The `result` of awaiting `upytest.run` is a Python dictionary containing 
+  lists of tests bucketed under the keys: `"passes"`, `"fails"` and 
+  `"skipped"`. These results can be used for further processing and analysis
+  (again, see `main.py` for an example of this in action.)
+8. In your `index.html` make sure you use the `terminal` attribute
    when referencing your Python script (as in the `index.html` file in
    this repository):
    ```html
-   <script type="mpy" src="./main.py" config="./config.json" terminal async></script>
+   <script type="mpy" src="./main.py" config="./config.json" terminal></script>
    ```
    You should be able to use the `type` attribute of `"mpy"` (for MicroPython)
    and `"py"` (for Pyodide) interchangeably.
@@ -163,58 +180,52 @@ The output for the test suite for this module is a good example of all the
 different sorts of information you may see:
 
 ```
-Using conftest.py for global setup and teardown.
+Using ./tests/conftest.py for global setup and teardown in ./tests.
+Using local setup and teardown for ./tests/test_with_setup_teardown.py.
 Found 2 test module[s]. Running 14 test[s].
 
-FF.SF.F..F.SF.
+..FF..SFF.SFF.
 ================================= FAILURES =================================
-
-./tests/test_core_functionality.py::test_async_does_not_raise_expected_exception
+Failed: ./tests/test_core_functionality.py::test_does_not_raise_expected_exception_fails
 Traceback (most recent call last):
-  File "upytest.py", line 89, in run
-  File "test_core_functionality.py", line 103, in test_async_does_not_raise_expected_exception
-  File "upytest.py", line 240, in __exit__
-AssertionError: Did not raise expected exception. Expected ValueError, AssertionError; but got
-TypeError.
+  File "upytest.py", line 143, in run
+  File "tests/test_core_functionality.py", line 67, in test_does_not_raise_expected_exception_fails
+AssertionError: Did not raise expected exception. Expected ValueError, AssertionError; but got TypeError.
 
 
-./tests/test_core_functionality.py::test_async_does_not_raise_exception
+Failed: ./tests/test_core_functionality.py::test_async_does_not_raise_expected_exception_fails
 Traceback (most recent call last):
-  File "upytest.py", line 89, in run
-  File "test_core_functionality.py", line 97, in test_async_does_not_raise_exception
-  File "upytest.py", line 240, in __exit__
+  File "upytest.py", line 141, in run
+  File "tests/test_core_functionality.py", line 98, in test_async_does_not_raise_expected_exception_fails
+AssertionError: Did not raise expected exception. Expected ValueError, AssertionError; but got TypeError.
+
+
+Failed: ./tests/test_core_functionality.py::test_does_not_raise_exception_fails
+Traceback (most recent call last):
+  File "upytest.py", line 143, in run
+  File "tests/test_core_functionality.py", line 59, in test_does_not_raise_exception_fails
 AssertionError: Did not raise expected exception. Expected ValueError; but got None.
 
 
-./tests/test_core_functionality.py::test_fails
+Failed: ./tests/test_core_functionality.py::test_async_fails
 Traceback (most recent call last):
-  File "upytest.py", line 91, in run
-  File "test_core_functionality.py", line 29, in test_fails
-AssertionError: This test fails
-
-
-./tests/test_core_functionality.py::test_does_not_raise_expected_exception
-Traceback (most recent call last):
-  File "upytest.py", line 91, in run
-  File "test_core_functionality.py", line 67, in test_does_not_raise_expected_exception
-  File "upytest.py", line 240, in __exit__
-AssertionError: Did not raise expected exception. Expected ValueError, AssertionError; but got
-TypeError.
-
-
-./tests/test_core_functionality.py::test_async_fails
-Traceback (most recent call last):
-  File "upytest.py", line 89, in run
-  File "test_core_functionality.py", line 85, in test_async_fails
+  File "upytest.py", line 141, in run
+  File "tests/test_core_functionality.py", line 83, in test_async_fails
 AssertionError: This async test fails.
 
 
-./tests/test_core_functionality.py::test_does_not_raise_exception
+Failed: ./tests/test_core_functionality.py::test_async_does_not_raise_exception_fails
 Traceback (most recent call last):
-  File "upytest.py", line 91, in run
-  File "test_core_functionality.py", line 59, in test_does_not_raise_exception
-  File "upytest.py", line 240, in __exit__
+  File "upytest.py", line 141, in run
+  File "tests/test_core_functionality.py", line 93, in test_async_does_not_raise_exception_fails
 AssertionError: Did not raise expected exception. Expected ValueError; but got None.
+
+
+Failed: ./tests/test_core_functionality.py::test_fails
+Traceback (most recent call last):
+  File "upytest.py", line 143, in run
+  File "tests/test_core_functionality.py", line 28, in test_fails
+AssertionError: This test will fail
 
 ========================= short test summary info ==========================
 6 failed, 2 skipped, 6 passed in 0.00 seconds
@@ -239,7 +250,33 @@ We expect all contributors to abide by the spirit of our
 ## Testing uPyTest
 
 See the content of the `tests` directory in this repository. To run the test
-suite, just follow steps 1, 2 and 3 in the developer setup section.
+suite, just follow steps 1, 2 and 3 in the developer setup section. The
+`main.py` script tests the test framework itself. From the docstring for that
+module:
+
+> How do you test a test framework?
+>
+> You can't use the test framework to test itself, because it may contain bugs!
+> Hence this script, which uses upytest to run tests and check the results are as
+> expected. The expected results are hard-coded in this script, and the actual
+> results are generated by running tests with upytest. The script then compares
+> the expected and actual results to ensure they match.
+>
+> Finally, the script creates a div element to display the results in the page.
+> If tests fail, the script will raise an AssertionError, which will be
+> displayed with a red background. If the tests pass, the script will display a
+> message with a green background.
+>
+> There are two sorts of expected results: the number of tests that pass, fail,
+> and are skipped, and the names of the tests that pass, fail, and are skipped.
+> Tests that pass end with "passes", tests that fail end with "fails", and tests
+> that are skipped end with "skipped".
+>
+> This script will work with both MicroPython and Pyodide, just so we can ensure
+> the test framework works in both environments. The index.html file uses
+> MicroPython, the index2.html file uses Pyodide.
+>
+> That's it! Now we can test a test framework with a meta-test framework. 🤯
 
 ## License
 

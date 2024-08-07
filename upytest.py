@@ -100,7 +100,15 @@ def parse_traceback_from_exception(ex):
     else:
         print_exception(ex, file=traceback_data)
     traceback_data.seek(0)
-    return traceback_data.read()
+    raw_traceback = traceback_data.read()
+    # Ensure removal of any __exit__ related lines caused by the raises context
+    # manager and MicroPython.
+    result = []
+    for line in raw_traceback.split("\n"):
+        if line.endswith("in __exit__") and "upytest" in line:
+            continue
+        result.append(line)
+    return "\n".join(result)
 
 
 class TestCase:
@@ -158,6 +166,7 @@ class TestModule:
         self._setup = setup
         self._teardown = teardown
         self._tests = []
+        local_setup_teardown = False
         # Harvest references to test functions, setup and teardown.
         for name, item in self.module.__dict__.items():
             if callable(item) or is_awaitable(item):
@@ -166,8 +175,14 @@ class TestModule:
                     self._tests.append(t)
                 elif name == "setup":
                     self._setup = item
+                    local_setup_teardown = True
                 elif name == "teardown":
                     self._teardown = item
+                    local_setup_teardown = True
+        if local_setup_teardown:
+            print(
+                f"Using \033[1mlocal\033[0m setup and teardown for \033[1m{self.path}\033[0m."
+            )
 
     @property
     def tests(self):
@@ -191,6 +206,12 @@ class TestModule:
         """
         return self._teardown
 
+    def limit_tests_to(self, test_names):
+        """
+        Limit the tests run to the provided test_names list of names.
+        """
+        self._tests = [t for t in self._tests if t.test_name in test_names]
+
     async def run(self):
         """
         Run each TestCase instance for this module. If a setup or teardown
@@ -213,28 +234,74 @@ class TestModule:
                 else:
                     self.teardown()
             if test_case.status == SKIPPED:
-                print("S", end="")
+                print("\033[33;1mS\033[0m", end="")
             elif test_case.status == PASS:
-                print(".", end="")
+                print("\033[32;1m.\033[0m", end="")
             else:
-                print("F", end="")
+                print("\033[31;1mF\033[0m", end="")
 
 
-def discover(start_dir, pattern, setup=None, teardown=None):
+def gather_conftest_functions(conftest_path, target):
+    """
+    Import the conftest.py module from the given Path instance, and return the
+    global setup and teardown functions for the target (if they exist).
+    """
+    if conftest_path.exists():
+        print(
+            f"Using \033[1m{conftest_path}\033[0m for global setup and teardown in \033[1m{target}\033[0m."
+        )
+        conftest = import_module(conftest_path)
+        setup = conftest.setup if hasattr(conftest, "setup") else None
+        teardown = conftest.teardown if hasattr(conftest, "teardown") else None
+        return setup, teardown
+    return None, None
+
+
+def discover(targets, pattern, setup=None, teardown=None):
     """
     Return a list of TestModule instances representing Python modules
-    recursively found in the start_dir and whose name matches the pattern for
-    identifying test modules.
+    recursively found via the targets and, if a target is a directory, whose
+    module name matches the pattern for identifying test modules.
 
-    If global setup and teardown functions are provided, these will be used for
-    each test module unless overridden by module-specific setup and teardown
-    functions.
+    The targets may be simply a string describing the directory in
+    which to start looking for test modules (e.g. "./tests"), or strings
+    representing the names of specific test modules / tests to run (of the
+    form: "module_path" or "module_path::test_function" or
+    "module_path::test_function_1,test_function_2"; e.g. "tests/test_module.py"
+    or "tests/test_module.py::test_stuff" or
+    "tests/test_module.py::test_stuff,test_more_stuff").
+
+    If there is a conftest.py file in any of the specified directories
+    containing a test module, it will be imported for any global setup and
+    teardown functions to use for modules found within that directory. These
+    setup and teardown functions can be overridden in the individual test
+    modules.
     """
     result = []
-    for module_path in Path(start_dir).rglob(pattern):
-        module_instance = import_module(module_path)
-        module = TestModule(module_path, module_instance, setup, teardown)
-        result.append(module)
+    for target in targets:
+        if "::" in target:
+            conftest_path = Path(target.split("::")[0]).parent / "conftest.py"
+            setup, teardown = gather_conftest_functions(conftest_path, target)
+            module_path, test_names = target.split("::")
+            module_instance = import_module(module_path)
+            module = TestModule(module_path, module_instance, setup, teardown)
+            module.limit_tests_to(test_names.split(","))
+            result.append(module)
+        elif os.path.isdir(target):
+            conftest_path = Path(target) / "conftest.py"
+            setup, teardown = gather_conftest_functions(conftest_path, target)
+            for module_path in Path(target).rglob(pattern):
+                module_instance = import_module(module_path)
+                module = TestModule(
+                    module_path, module_instance, setup, teardown
+                )
+                result.append(module)
+        else:
+            conftest_path = Path(target).parent / "conftest.py"
+            setup, teardown = gather_conftest_functions(conftest_path, target)
+            module_instance = import_module(target)
+            module = TestModule(target, module_instance, setup, teardown)
+            result.append(module)
     return result
 
 
@@ -294,32 +361,34 @@ def skip(reason=""):
     return decorator
 
 
-async def run(start_dir=".", pattern="test_*.py"):
+async def run(*args, **kwargs):
     """
-    Run the test suite given a start_dir and pattern for identifying test
-    modules.
+    Run the test suite given args that specify the tests to run.
 
-    If there is a conftest.py file in the start_dir, it will be imported for
-    any global setup and teardown functions to use. These setup and teardown
-    functions can be overridden in the individual test modules.
+    The specification may be simply a string describing the directory in
+    which to start looking for test modules (e.g. "./tests"), or strings
+    representing the names of specific test modules / tests to run (of the
+    form: "module_path" or "module_path::test_function"; e.g.
+    "tests/test_module.py" or "tests/test_module.py::test_stuff").
+
+    If a named `pattern` argument is provided, it will be used to match test
+    modules in the specification for target directories. The default pattern is
+    "test_*.py".
+
+    If there is a conftest.py file in any of the specified directories
+    containing a test module, it will be imported for any global setup and
+    teardown functions to use for modules found within that directory. These
+    setup and teardown functions can be overridden in the individual test
+    modules.
     """
-    setup = None
-    teardown = None
-    conftest = os.path.join(start_dir, "conftest.py")
-    if os.path.exists(conftest):
-        print("Using conftest.py for global setup and teardown.")
-        conftest_instance = import_module(conftest)
-        setup = (
-            conftest_instance.setup
-            if hasattr(conftest_instance, "setup")
-            else None
-        )
-        teardown = (
-            conftest_instance.teardown
-            if hasattr(conftest_instance, "teardown")
-            else None
-        )
-    test_modules = discover(start_dir, pattern, setup, teardown)
+    targets = []
+    pattern = kwargs.get("pattern", "test_*.py")
+    for arg in args:
+        if isinstance(arg, str):
+            targets.append(arg)
+        else:
+            raise ValueError(f"Unexpected argument: {arg}")
+    test_modules = discover(targets, pattern)
     module_count = len(test_modules)
     test_count = sum([len(module.tests) for module in test_modules])
     print(
@@ -328,6 +397,7 @@ async def run(start_dir=".", pattern="test_*.py"):
 
     failed_tests = []
     skipped_tests = []
+    passed_tests = []
     start = time.time()
     for module in test_modules:
         await module.run()
@@ -336,16 +406,27 @@ async def run(start_dir=".", pattern="test_*.py"):
                 failed_tests.append(test)
             elif test.status == SKIPPED:
                 skipped_tests.append(test)
+            elif test.status == PASS:
+                passed_tests.append(test)
     end = time.time()
     print("")
     if failed_tests:
         print(
-            "================================= FAILURES ================================="
+            "================================= \033[31;1mFAILURES\033[0m ================================="
         )
         for failed in failed_tests:
-            print("")
-            print(failed.module_name, "::", failed.test_name, sep="")
+            print(
+                "Failed: ",
+                "\033[1m",
+                failed.module_name,
+                "::",
+                failed.test_name,
+                "\033[0m",
+                sep="",
+            )
             print(failed.traceback)
+            if failed != failed_tests[-1]:
+                print("")
     error_count = len(failed_tests)
     skip_count = len(skipped_tests)
     pass_count = test_count - error_count - skip_count
@@ -354,5 +435,10 @@ async def run(start_dir=".", pattern="test_*.py"):
         "========================= short test summary info =========================="
     )
     print(
-        f"{error_count} failed, {skip_count} skipped, {pass_count} passed in {dur:.2f} seconds"
+        f"\033[1m{error_count}\033[0m \033[31;1mfailed\033[0m, \033[1m{skip_count}\033[0m \033[33;1mskipped\033[0m, \033[1m{pass_count}\033[0m \033[32;1mpassed\033[0m in \033[1m{dur:.2f} seconds\033[0m"
     )
+    return {
+        "passes": [t.test_name for t in passed_tests],
+        "fails": [t.test_name for t in failed_tests],
+        "skipped": [t.test_name for t in skipped_tests],
+    }

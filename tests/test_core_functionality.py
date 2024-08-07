@@ -28,9 +28,10 @@ def test_fails():
     assert False, "This test will fail"
 
 
-def test_raises_expects_base_exception_children():
+def test_raises_expects_base_exception_children_passes():
     """
-    Check that `upytest.raises` expects subclasses of `BaseException`.
+    Check that `upytest.raises` expects subclasses of `BaseException`. This
+    test will pass.
     """
     # Must have expected exception[s] as arguments.
     with upytest.raises(ValueError):
@@ -42,7 +43,7 @@ def test_raises_expects_base_exception_children():
             pass
 
 
-def test_raises_exception():
+def test_raises_exception_passes():
     """
     Test that the expected exception is raised, and so the test will pass.
     """
@@ -50,7 +51,7 @@ def test_raises_exception():
         raise ValueError("This is a ValueError")
 
 
-def test_does_not_raise_exception():
+def test_does_not_raise_exception_fails():
     """
     Test that the expected exception is not raised. This test will fail.
     """
@@ -58,7 +59,7 @@ def test_does_not_raise_exception():
         pass
 
 
-def test_does_not_raise_expected_exception():
+def test_does_not_raise_expected_exception_fails():
     """
     Test when the wrong exception is raised. This test will fail.
     """
@@ -70,7 +71,7 @@ def test_does_not_raise_expected_exception():
 
 
 @upytest.skip("This async test will be skipped")
-async def test_async_skip():
+async def test_async_skipped():
     assert False  # This will not be executed.
 
 
@@ -82,16 +83,16 @@ async def test_async_fails():
     assert False, "This async test fails."
 
 
-async def test_async_raises_exception():
+async def test_async_raises_exception_passes():
     with upytest.raises(ValueError):
         raise ValueError("This is a ValueError")
 
 
-async def test_async_does_not_raise_exception():
+async def test_async_does_not_raise_exception_fails():
     with upytest.raises(ValueError):
         pass
 
 
-async def test_async_does_not_raise_expected_exception():
+async def test_async_does_not_raise_expected_exception_fails():
     with upytest.raises(ValueError, AssertionError):
         raise TypeError("This is a TypeError")
