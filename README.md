@@ -196,53 +196,53 @@ different sorts of information you may see:
 ```
 Using ./tests/conftest.py for global setup and teardown in ./tests.
 Using local setup and teardown for ./tests/test_with_setup_teardown.py.
-Found 2 test module[s]. Running 14 test[s].
+Found 2 test module[s]. Running 18 test[s].
 
-..FF..SFF.SFF.
+S.F..FFFS..S.F.SF.
 ================================= FAILURES =================================
-Failed: ./tests/test_core_functionality.py::test_does_not_raise_expected_exception_fails
-Traceback (most recent call last):
-  File "upytest.py", line 143, in run
-  File "tests/test_core_functionality.py", line 67, in test_does_not_raise_expected_exception_fails
-AssertionError: Did not raise expected exception. Expected ValueError, AssertionError; but got TypeError.
-
-
-Failed: ./tests/test_core_functionality.py::test_async_does_not_raise_expected_exception_fails
-Traceback (most recent call last):
-  File "upytest.py", line 141, in run
-  File "tests/test_core_functionality.py", line 98, in test_async_does_not_raise_expected_exception_fails
-AssertionError: Did not raise expected exception. Expected ValueError, AssertionError; but got TypeError.
-
-
 Failed: ./tests/test_core_functionality.py::test_does_not_raise_exception_fails
 Traceback (most recent call last):
   File "upytest.py", line 143, in run
-  File "tests/test_core_functionality.py", line 59, in test_does_not_raise_exception_fails
-AssertionError: Did not raise expected exception. Expected ValueError; but got None.
-
-
-Failed: ./tests/test_core_functionality.py::test_async_fails
-Traceback (most recent call last):
-  File "upytest.py", line 141, in run
-  File "tests/test_core_functionality.py", line 83, in test_async_fails
-AssertionError: This async test fails.
-
-
-Failed: ./tests/test_core_functionality.py::test_async_does_not_raise_exception_fails
-Traceback (most recent call last):
-  File "upytest.py", line 141, in run
-  File "tests/test_core_functionality.py", line 93, in test_async_does_not_raise_exception_fails
+  File "tests/test_core_functionality.py", line 77, in test_does_not_raise_exception_fails
 AssertionError: Did not raise expected exception. Expected ValueError; but got None.
 
 
 Failed: ./tests/test_core_functionality.py::test_fails
 Traceback (most recent call last):
   File "upytest.py", line 143, in run
-  File "tests/test_core_functionality.py", line 28, in test_fails
+  File "tests/test_core_functionality.py", line 46, in test_fails
 AssertionError: This test will fail
 
+
+Failed: ./tests/test_core_functionality.py::test_async_does_not_raise_exception_fails
+Traceback (most recent call last):
+  File "upytest.py", line 141, in run
+  File "tests/test_core_functionality.py", line 121, in test_async_does_not_raise_exception_fails
+AssertionError: Did not raise expected exception. Expected ValueError; but got None.
+
+
+Failed: ./tests/test_core_functionality.py::test_async_does_not_raise_expected_exception_fails
+Traceback (most recent call last):
+  File "upytest.py", line 141, in run
+  File "tests/test_core_functionality.py", line 126, in test_async_does_not_raise_expected_exception_fails
+AssertionError: Did not raise expected exception. Expected ValueError, AssertionError; but got TypeError.
+
+
+Failed: ./tests/test_core_functionality.py::test_does_not_raise_expected_exception_fails
+Traceback (most recent call last):
+  File "upytest.py", line 143, in run
+  File "tests/test_core_functionality.py", line 85, in test_does_not_raise_expected_exception_fails
+AssertionError: Did not raise expected exception. Expected ValueError, AssertionError; but got TypeError.
+
+
+Failed: ./tests/test_core_functionality.py::test_async_fails
+Traceback (most recent call last):
+  File "upytest.py", line 141, in run
+  File "tests/test_core_functionality.py", line 111, in test_async_fails
+AssertionError: This async test fails.
+
 ========================= short test summary info ==========================
-6 failed, 2 skipped, 6 passed in 0.00 seconds
+6 failed, 4 skipped, 8 passed in 0.00 seconds
 ```
 
 ## Developer setup

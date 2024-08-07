@@ -102,6 +102,7 @@ async def test_async_when_skipped():
 async def test_async_when_not_skipped_passes():
     assert True, "This async test passes"
 
+
 async def test_async_passes():
     assert True, "This async test passes."
 
