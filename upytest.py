@@ -371,7 +371,7 @@ def skip(reason="", when=True):
             return func
     else:
         def decorator(func):
-            return func()
+            return func
 
     return decorator
 

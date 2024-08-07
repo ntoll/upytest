@@ -30,12 +30,12 @@ import upytest
 
 expected_results = {
     "result_all": {
-        "passes": 6,
+        "passes": 8,
         "fails": 6,
         "skipped": 4,
     },
     "result_module": {
-        "passes": 5,
+        "passes": 7,
         "fails": 6,
         "skipped": 4,
     },
@@ -81,25 +81,25 @@ page.append(
         div(
             p(
                 b("All Tests: "),
-                f"Passes: {len(actual_results['result_all']['passes'])}"
-                f" Fails: {len(actual_results['result_all']['fails'])}"
-                f" Skipped: {len(actual_results['result_all']['skipped'])}",
+                f"Passes: {len(actual_results['result_all']['passes'])},"
+                f" Fails: {len(actual_results['result_all']['fails'])},"
+                f" Skipped: {len(actual_results['result_all']['skipped'])}.",
             ),
         ),
         div(
             p(
                 b("Tests in a Specified Module: "),
-                f"Passes: {len(actual_results['result_module']['passes'])}"
-                f" Fails: {len(actual_results['result_module']['fails'])}"
-                f" Skipped: {len(actual_results['result_module']['skipped'])}",
+                f"Passes: {len(actual_results['result_module']['passes'])},"
+                f" Fails: {len(actual_results['result_module']['fails'])},"
+                f" Skipped: {len(actual_results['result_module']['skipped'])}.",
             ),
         ),
         div(
             p(
                 b("Test a Specific Test: "),
-                f"Passes: {len(actual_results['result_specific']['passes'])}"
-                f" Fails: {len(actual_results['result_specific']['fails'])}"
-                f" Skipped: {len(actual_results['result_specific']['skipped'])}",
+                f"Passes: {len(actual_results['result_specific']['passes'])},"
+                f" Fails: {len(actual_results['result_specific']['fails'])},"
+                f" Skipped: {len(actual_results['result_specific']['skipped'])}.",
             ),
         ),
         style={
