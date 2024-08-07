@@ -34,7 +34,7 @@ those who use PyTest, when using PyScript.
 
 **This module is for use within PyScript.**
 
-### Setup/ Run tests
+### Setup / Run tests
 
 1. Ensure the `upytest.py` file is in your Python path. You may need to copy
    this over using the 
