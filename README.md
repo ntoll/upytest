@@ -202,45 +202,57 @@ S.F..FFFS..S.F.SF.
 ================================= FAILURES =================================
 Failed: ./tests/test_core_functionality.py::test_does_not_raise_exception_fails
 Traceback (most recent call last):
-  File "upytest.py", line 143, in run
+  File "upytest.py", line 147, in run
   File "tests/test_core_functionality.py", line 77, in test_does_not_raise_exception_fails
 AssertionError: Did not raise expected exception. Expected ValueError; but got None.
 
 
 Failed: ./tests/test_core_functionality.py::test_fails
 Traceback (most recent call last):
-  File "upytest.py", line 143, in run
+  File "upytest.py", line 147, in run
   File "tests/test_core_functionality.py", line 46, in test_fails
 AssertionError: This test will fail
 
 
 Failed: ./tests/test_core_functionality.py::test_async_does_not_raise_exception_fails
 Traceback (most recent call last):
-  File "upytest.py", line 141, in run
+  File "upytest.py", line 145, in run
   File "tests/test_core_functionality.py", line 121, in test_async_does_not_raise_exception_fails
 AssertionError: Did not raise expected exception. Expected ValueError; but got None.
 
 
 Failed: ./tests/test_core_functionality.py::test_async_does_not_raise_expected_exception_fails
 Traceback (most recent call last):
-  File "upytest.py", line 141, in run
+  File "upytest.py", line 145, in run
   File "tests/test_core_functionality.py", line 126, in test_async_does_not_raise_expected_exception_fails
 AssertionError: Did not raise expected exception. Expected ValueError, AssertionError; but got TypeError.
 
 
 Failed: ./tests/test_core_functionality.py::test_does_not_raise_expected_exception_fails
 Traceback (most recent call last):
-  File "upytest.py", line 143, in run
+  File "upytest.py", line 147, in run
   File "tests/test_core_functionality.py", line 85, in test_does_not_raise_expected_exception_fails
 AssertionError: Did not raise expected exception. Expected ValueError, AssertionError; but got TypeError.
 
 
 Failed: ./tests/test_core_functionality.py::test_async_fails
 Traceback (most recent call last):
-  File "upytest.py", line 141, in run
+  File "upytest.py", line 145, in run
   File "tests/test_core_functionality.py", line 111, in test_async_fails
 AssertionError: This async test fails.
 
+================================= SKIPPED ==================================
+Skipped: ./tests/test_core_functionality.py::test_when_skipped
+Reason: This test will be skipped with a when condition
+
+Skipped: ./tests/test_core_functionality.py::test_async_when_skipped
+Reason: This test will be skipped with a when condition
+
+Skipped: ./tests/test_core_functionality.py::test_async_skipped
+Reason: This async test will be skipped
+
+Skipped: ./tests/test_core_functionality.py::test_skipped
+Reason: This test will be skipped
 ========================= short test summary info ==========================
 6 failed, 4 skipped, 8 passed in 0.00 seconds
 ```

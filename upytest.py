@@ -52,8 +52,8 @@ __all__ = [
 is_micropython = "micropython" in sys.version.lower()
 
 
-#: To contain references to any skipped tests.
-_SKIPPED_TESTS = []
+#: To contain reasons given for any skipped tests: {id(test_function): reason}
+_SKIPPED_TESTS = {}
 
 
 # Possible states for a test case.
@@ -127,14 +127,18 @@ class TestCase:
         self.test_name = test_name
         self.status = PENDING  # the initial state of the test.
         self.traceback = None  # to contain details of any failure.
+        self.reason = None  # to contain the reason for skipping the test.
 
     async def run(self):
         """
         Run the test function and set the status and traceback attributes, as
         required.
         """
-        if self.test_function in _SKIPPED_TESTS:
+        if id(self.test_function) in _SKIPPED_TESTS:
             self.status = SKIPPED
+            self.reason = _SKIPPED_TESTS.get(id(self.test_function))
+            if not self.reason:
+                self.reason = "No reason given."
             return
         try:
             if is_awaitable(self.test_function):
@@ -356,8 +360,8 @@ def skip(reason="", when=True):
     The test will only be skipped if the optional when argument is True (the
     default value is True).
 
-    If when is False, the decorated test will be run. This is useful
-    for conditional skipping of tests. E.g.:
+    If when is False, the decorated test will be run rather than be skipped.
+    This is useful for conditional skipping of tests. E.g.:
 
     @skip("Skip this if using MicroPython", when=is_micropython)
     def test_something():
@@ -368,7 +372,7 @@ def skip(reason="", when=True):
 
         def decorator(func):
             global _SKIPPED_TESTS
-            _SKIPPED_TESTS.append(func)
+            _SKIPPED_TESTS[id(func)] = reason
             return func
 
     else:
@@ -445,6 +449,23 @@ async def run(*args, **kwargs):
             print(failed.traceback)
             if failed != failed_tests[-1]:
                 print("")
+    if skipped_tests:
+        print(
+            "================================= \033[33;1mSKIPPED\033[0m =================================="
+        )
+        for test_case in skipped_tests:
+            print(
+                "Skipped: ",
+                "\033[1m",
+                test_case.module_name,
+                "::",
+                test_case.test_name,
+                "\033[0m",
+                sep="",
+            )
+            print(f"Reason: {test_case.reason}")
+            if test_case != skipped_tests[-1]:
+                print("")
     error_count = len(failed_tests)
     skip_count = len(skipped_tests)
     pass_count = test_count - error_count - skip_count
@@ -456,7 +477,7 @@ async def run(*args, **kwargs):
         f"\033[1m{error_count}\033[0m \033[31;1mfailed\033[0m, \033[1m{skip_count}\033[0m \033[33;1mskipped\033[0m, \033[1m{pass_count}\033[0m \033[32;1mpassed\033[0m in \033[1m{dur:.2f} seconds\033[0m"
     )
     return {
-        "passes": [t.test_name for t in passed_tests],
-        "fails": [t.test_name for t in failed_tests],
-        "skipped": [t.test_name for t in skipped_tests],
+        "passes": passed_tests,
+        "fails": failed_tests,
+        "skipped": skipped_tests,
     }

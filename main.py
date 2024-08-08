@@ -72,7 +72,9 @@ for name, result in expected_results.items():
 for name, result in actual_results.items():
     for key, value in result.items():
         for test in value:
-            assert test.endswith(key), f"Test {test} does not end with {key}"
+            assert test.test_name.endswith(
+                key
+            ), f"Test {test.test_name} does not end with {key}"
 
 # Create a div to display the results in the page.
 page.append(
