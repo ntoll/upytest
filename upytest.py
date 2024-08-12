@@ -70,10 +70,17 @@ SKIPPED = "skipped"
 def is_awaitable(obj):
     """
     Returns a boolean indication if the passed in obj is an awaitable
-    function. (MicroPython treats awaitables as generator functions.)
+    function. (MicroPython treats awaitables as generator functions, and if
+    the object is a closure containing an async function we need to tread
+    carefully.)
     """
     if is_micropython:
+        # MicroPython doesn't appear to have a way to determine if a closure is
+        # an async function except via the repr. This is a bit hacky.
+        if "<closure <generator>" in repr(obj):
+            return True
         return inspect.isgeneratorfunction(obj)
+
     return inspect.iscoroutinefunction(obj)
 
 
