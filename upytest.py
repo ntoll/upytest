@@ -89,7 +89,9 @@ def import_module(module_path):
     Import a module from a given file path, in a way that works with both
     MicroPython and Pyodide.
     """
-    dotted_path = str(module_path).replace("/", ".").replace(".py", "")
+    dotted_path = (
+        str(module_path).replace("/", ".").replace(".py", "")
+    )
     dotted_path = dotted_path.lstrip(".")
     module = __import__(dotted_path)
     for part in dotted_path.split(".")[1:]:
@@ -134,7 +136,9 @@ class TestCase:
         self.test_name = test_name
         self.status = PENDING  # the initial state of the test.
         self.traceback = None  # to contain details of any failure.
-        self.reason = None  # to contain the reason for skipping the test.
+        self.reason = (
+            None  # to contain the reason for skipping the test.
+        )
 
     async def run(self):
         """
@@ -221,7 +225,9 @@ class TestModule:
         """
         Limit the tests run to the provided test_names list of names.
         """
-        self._tests = [t for t in self._tests if t.test_name in test_names]
+        self._tests = [
+            t for t in self._tests if t.test_name in test_names
+        ]
 
     async def run(self):
         """
@@ -264,7 +270,11 @@ def gather_conftest_functions(conftest_path, target):
         )
         conftest = import_module(conftest_path)
         setup = conftest.setup if hasattr(conftest, "setup") else None
-        teardown = conftest.teardown if hasattr(conftest, "teardown") else None
+        teardown = (
+            conftest.teardown
+            if hasattr(conftest, "teardown")
+            else None
+        )
         return setup, teardown
     return None, None
 
@@ -292,16 +302,24 @@ def discover(targets, pattern, setup=None, teardown=None):
     result = []
     for target in targets:
         if "::" in target:
-            conftest_path = Path(target.split("::")[0]).parent / "conftest.py"
-            setup, teardown = gather_conftest_functions(conftest_path, target)
+            conftest_path = (
+                Path(target.split("::")[0]).parent / "conftest.py"
+            )
+            setup, teardown = gather_conftest_functions(
+                conftest_path, target
+            )
             module_path, test_names = target.split("::")
             module_instance = import_module(module_path)
-            module = TestModule(module_path, module_instance, setup, teardown)
+            module = TestModule(
+                module_path, module_instance, setup, teardown
+            )
             module.limit_tests_to(test_names.split(","))
             result.append(module)
         elif os.path.isdir(target):
             conftest_path = Path(target) / "conftest.py"
-            setup, teardown = gather_conftest_functions(conftest_path, target)
+            setup, teardown = gather_conftest_functions(
+                conftest_path, target
+            )
             for module_path in Path(target).rglob(pattern):
                 module_instance = import_module(module_path)
                 module = TestModule(
@@ -310,9 +328,13 @@ def discover(targets, pattern, setup=None, teardown=None):
                 result.append(module)
         else:
             conftest_path = Path(target).parent / "conftest.py"
-            setup, teardown = gather_conftest_functions(conftest_path, target)
+            setup, teardown = gather_conftest_functions(
+                conftest_path, target
+            )
             module_instance = import_module(target)
-            module = TestModule(target, module_instance, setup, teardown)
+            module = TestModule(
+                target, module_instance, setup, teardown
+            )
             result.append(module)
     return result
 
