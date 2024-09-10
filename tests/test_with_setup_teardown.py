@@ -13,9 +13,7 @@ async def setup():
 
 
 async def teardown():
-    window.console.log(
-        "Teardown from async teardown function in module"
-    )
+    window.console.log("Teardown from async teardown function in module")
 
 
 def test_with_local_setup_teardown_passes():

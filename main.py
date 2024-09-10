@@ -30,14 +30,19 @@ import upytest
 
 expected_results = {
     "result_all": {
-        "passes": 8,
-        "fails": 6,
-        "skipped": 4,
+        "passes": 11,
+        "fails": 9,
+        "skipped": 6,
     },
     "result_module": {
-        "passes": 7,
-        "fails": 6,
-        "skipped": 4,
+        "passes": 10,
+        "fails": 9,
+        "skipped": 6,
+    },
+    "result_class": {
+        "passes": 3,
+        "fails": 3,
+        "skipped": 2,
     },
     "result_specific": {
         "passes": 1,
@@ -48,12 +53,20 @@ expected_results = {
 
 actual_results = {}
 # Run all tests in the tests directory.
+print("\033[1mRunning all tests in directory...\033[0m")
 actual_results["result_all"] = await upytest.run("./tests")
 # Run all tests in a specific module.
+print("\n\n\033[1mRunning all tests in a specific module...\033[0m")
 actual_results["result_module"] = await upytest.run(
     "tests/test_core_functionality.py"
 )
+# Run all tests in a specific test class.
+print("\n\n\033[1mRunning all tests in a specific class...\033[0m")
+actual_results["result_class"] = await upytest.run(
+    "tests/test_core_functionality.py::TestClass"
+)
 # Run a specific test function.
+print("\n\n\033[1mRun a specific function...\033[0m")
 actual_results["result_specific"] = await upytest.run(
     "tests/test_core_functionality.py::test_passes"
 )
@@ -94,6 +107,14 @@ page.append(
                 f"Passes: {len(actual_results['result_module']['passes'])},"
                 f" Fails: {len(actual_results['result_module']['fails'])},"
                 f" Skipped: {len(actual_results['result_module']['skipped'])}.",
+            ),
+        ),
+        div(
+            p(
+                b("Tests in a Specified Test Class: "),
+                f"Passes: {len(actual_results['result_class']['passes'])},"
+                f" Fails: {len(actual_results['result_class']['fails'])},"
+                f" Skipped: {len(actual_results['result_class']['skipped'])}.",
             ),
         ),
         div(

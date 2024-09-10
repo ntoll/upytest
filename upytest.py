@@ -89,9 +89,7 @@ def import_module(module_path):
     Import a module from a given file path, in a way that works with both
     MicroPython and Pyodide.
     """
-    dotted_path = (
-        str(module_path).replace("/", ".").replace(".py", "")
-    )
+    dotted_path = str(module_path).replace("/", ".").replace(".py", "")
     dotted_path = dotted_path.lstrip(".")
     module = __import__(dotted_path)
     for part in dotted_path.split(".")[1:]:
@@ -125,29 +123,28 @@ class TestCase:
     Represents an individual test to run.
     """
 
-    def __init__(self, test_function, module_name, test_name):
+    def __init__(self, test_function, module_name, test_name, function_id):
         """
         A TestCase is instantiated with a callable test_function, the name of
-        the module containing the test, and the name of the test within the
-        module.
+        the module containing the test, the name of the test within the module
+        and the unique Python id of the test function.
         """
         self.test_function = test_function
         self.module_name = module_name
         self.test_name = test_name
+        self.function_id = function_id
         self.status = PENDING  # the initial state of the test.
         self.traceback = None  # to contain details of any failure.
-        self.reason = (
-            None  # to contain the reason for skipping the test.
-        )
+        self.reason = None  # to contain the reason for skipping the test.
 
     async def run(self):
         """
         Run the test function and set the status and traceback attributes, as
         required.
         """
-        if id(self.test_function) in _SKIPPED_TESTS:
+        if self.function_id in _SKIPPED_TESTS:
             self.status = SKIPPED
-            self.reason = _SKIPPED_TESTS.get(id(self.test_function))
+            self.reason = _SKIPPED_TESTS.get(self.function_id)
             if not self.reason:
                 self.reason = "No reason given."
             return
@@ -186,12 +183,28 @@ class TestModule:
         for name, item in self.module.__dict__.items():
             if callable(item) or is_awaitable(item):
                 if name.startswith("test"):
-                    t = TestCase(item, self.path, name)
+                    # A simple test function.
+                    t = TestCase(item, self.path, name, id(item))
                     self._tests.append(t)
+                elif inspect.isclass(item) and name.startswith("Test"):
+                    # A test class, so check for test methods.
+                    instance = item()
+                    for method_name, method in item.__dict__.items():
+                        if callable(method) or is_awaitable(method):
+                            if method_name.startswith("test"):
+                                t = TestCase(
+                                    getattr(instance, method_name),
+                                    self.path,
+                                    f"{name}.{method_name}",
+                                    id(method),
+                                )
+                                self._tests.append(t)
                 elif name == "setup":
+                    # A local setup function.
                     self._setup = item
                     local_setup_teardown = True
                 elif name == "teardown":
+                    # A local teardown function.
                     self._teardown = item
                     local_setup_teardown = True
         if local_setup_teardown:
@@ -223,10 +236,14 @@ class TestModule:
 
     def limit_tests_to(self, test_names):
         """
-        Limit the tests run to the provided test_names list of names.
+        Limit the tests run to the provided test_names list of names of test
+        functions or test classes.
         """
         self._tests = [
-            t for t in self._tests if t.test_name in test_names
+            t
+            for t in self._tests
+            if (t.test_name in test_names)
+            or (t.test_name.split(".")[0] in test_names)
         ]
 
     async def run(self):
@@ -270,11 +287,7 @@ def gather_conftest_functions(conftest_path, target):
         )
         conftest = import_module(conftest_path)
         setup = conftest.setup if hasattr(conftest, "setup") else None
-        teardown = (
-            conftest.teardown
-            if hasattr(conftest, "teardown")
-            else None
-        )
+        teardown = conftest.teardown if hasattr(conftest, "teardown") else None
         return setup, teardown
     return None, None
 
@@ -302,24 +315,16 @@ def discover(targets, pattern, setup=None, teardown=None):
     result = []
     for target in targets:
         if "::" in target:
-            conftest_path = (
-                Path(target.split("::")[0]).parent / "conftest.py"
-            )
-            setup, teardown = gather_conftest_functions(
-                conftest_path, target
-            )
+            conftest_path = Path(target.split("::")[0]).parent / "conftest.py"
+            setup, teardown = gather_conftest_functions(conftest_path, target)
             module_path, test_names = target.split("::")
             module_instance = import_module(module_path)
-            module = TestModule(
-                module_path, module_instance, setup, teardown
-            )
+            module = TestModule(module_path, module_instance, setup, teardown)
             module.limit_tests_to(test_names.split(","))
             result.append(module)
         elif os.path.isdir(target):
             conftest_path = Path(target) / "conftest.py"
-            setup, teardown = gather_conftest_functions(
-                conftest_path, target
-            )
+            setup, teardown = gather_conftest_functions(conftest_path, target)
             for module_path in Path(target).rglob(pattern):
                 module_instance = import_module(module_path)
                 module = TestModule(
@@ -328,13 +333,9 @@ def discover(targets, pattern, setup=None, teardown=None):
                 result.append(module)
         else:
             conftest_path = Path(target).parent / "conftest.py"
-            setup, teardown = gather_conftest_functions(
-                conftest_path, target
-            )
+            setup, teardown = gather_conftest_functions(conftest_path, target)
             module_instance = import_module(target)
-            module = TestModule(
-                target, module_instance, setup, teardown
-            )
+            module = TestModule(target, module_instance, setup, teardown)
             result.append(module)
     return result
 

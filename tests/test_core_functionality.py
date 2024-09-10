@@ -15,7 +15,7 @@ def test_skipped():
 
 
 @upytest.skip(
-    "This test will be skipped with a when condition", skip_when=True
+    "This test will be skipped with a skip_when condition", skip_when=True
 )
 def test_when_skipped():
     """
@@ -26,7 +26,7 @@ def test_when_skipped():
 
 
 @upytest.skip(
-    "This test will NOT be skipped with a False-y when",
+    "This test will NOT be skipped with a False-y skip_when",
     skip_when=False,
 )
 def test_when_not_skipped_passes():
@@ -90,6 +90,47 @@ def test_does_not_raise_expected_exception_fails():
         raise TypeError("This is a TypeError")
 
 
+class TestClass:
+    """
+    A class based version of the above tests.
+    """
+
+    @upytest.skip("This test will be skipped")
+    def test_skipped(self):
+        assert False  # This will not be executed.
+
+    @upytest.skip(
+        "This test will be skipped with a skip_when condition", skip_when=True
+    )
+    def test_when_skipped(self):
+        assert False  # This will not be executed.
+
+    @upytest.skip(
+        "This test will NOT be skipped with a False-y skip_when",
+        skip_when=False,
+    )
+    def test_when_not_skipped_passes(self):
+        assert True, "This test passes"
+
+    def test_passes(self):
+        assert True, "This test passes"
+
+    def test_fails(self):
+        assert False, "This test will fail"
+
+    def test_raises_exception_passes(self):
+        with upytest.raises(ValueError):
+            raise ValueError("This is a ValueError")
+
+    def test_does_not_raise_exception_fails(self):
+        with upytest.raises(ValueError):
+            pass
+
+    def test_does_not_raise_expected_exception_fails(self):
+        with upytest.raises(ValueError, AssertionError):
+            raise TypeError("This is a TypeError")
+
+
 # Async versions of the above.
 
 
@@ -99,14 +140,14 @@ async def test_async_skipped():
 
 
 @upytest.skip(
-    "This test will be skipped with a when condition", skip_when=True
+    "This test will be skipped with a skip_when condition", skip_when=True
 )
 async def test_async_when_skipped():
     assert False  # This will not be executed.
 
 
 @upytest.skip(
-    "This test will NOT be skipped with a False-y when",
+    "This test will NOT be skipped with a False-y skip_when",
     skip_when=False,
 )
 async def test_async_when_not_skipped_passes():

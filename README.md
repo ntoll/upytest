@@ -56,9 +56,11 @@ those who use PyTest, when using PyScript.
    (This is demonstrated in the `main.py` file in this repository.)
 4. The specification may be simply a string describing the directory in
    which to start looking for test modules (e.g. `"./tests"`), or strings
-   representing the names of specific test modules / tests to run (of the
-   form: "module_path" or "module_path::test_function"; e.g.
-   `"tests/test_module.py"` or `"tests/test_module.py::test_stuff"`).
+   representing the names of specific test modules / test classes, tests to run
+   (of the form: "module_path", "module_path::TestClass" or
+   "module_path::test_function"; e.g. `"tests/test_module.py"`, 
+   `"tests/test_module.py::TestClass"` or
+   `"tests/test_module.py::test_stuff"`).
 5. If a named `pattern` argument is provided, it will be used to match test
    modules in the specification for target directories. The default pattern is
    "test_*.py".
@@ -109,6 +111,17 @@ Just like PyTest, use the `assert` statement to verify test expectations. As
 shown above, a string following a comma is used as the value for any resulting
 `AssertionError` should the `assert` fail.
 
+If you need to group tests together within a test module, use a class
+definition whose name starts with `Test` and whose test methods start with
+`test_`:
+
+```python
+class TestClass:
+
+   def test_something(self):
+      assert True, "This will not fail"
+```
+
 Sometimes you need to skip existing tests. Simply use the `skip` decorator like
 this:
 
@@ -122,15 +135,15 @@ def test_skipped():
 ```
 
 The `skip` decorator takes an optional string to describe why the test function
-is to be skipped. It also takes an optional `when` argument whose default value
-is `True`. If `when` is false-y, the decorated test **will NOT be skipped**. 
-This is useful for conditional skipping of tests. E.g.:
+is to be skipped. It also takes an optional `skip_when` argument whose default
+value is `True`. If `skip_when` is false-y, the decorated test **will NOT be 
+skipped**. This is useful for conditional skipping of tests. E.g.:
 
 ```python
 import upytest
 
 
-@skip("Skip this if using MicroPython", when=upytest.is_micropython)
+@skip("Skip this if using MicroPython", skip_when=upytest.is_micropython)
 def test_something():
    assert 1 == 1  # Only asserted if using Pyodide.
 ```
