@@ -433,6 +433,7 @@ async def run(*args, **kwargs):
     setup and teardown functions can be overridden in the individual test
     modules.
     """
+    print("Python interpreter: \033[1m", sys.platform, sys.version, "\033[0m")
     targets = []
     pattern = kwargs.get("pattern", "test_*.py")
     for arg in args:

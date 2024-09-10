@@ -207,6 +207,7 @@ The output for the test suite for this module is a good example of all the
 different sorts of information you may see:
 
 ```
+Python interpreter:  webassembly 3.4.0; MicroPython v1.24.0-preview.114.g77bd8fe5b on 2024-07-19
 Using ./tests/conftest.py for global setup and teardown in ./tests.
 Using local setup and teardown for ./tests/test_with_setup_teardown.py.
 Found 2 test module[s]. Running 18 test[s].
