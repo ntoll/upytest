@@ -513,14 +513,17 @@ async def run(*args, **kwargs):
     error_count = len(failed_tests)
     skip_count = len(skipped_tests)
     pass_count = test_count - error_count - skip_count
-    dur = end - start
+    duration = end - start
     print(
         "========================= short test summary info =========================="
     )
     print(
-        f"\033[1m{error_count}\033[0m \033[31;1mfailed\033[0m, \033[1m{skip_count}\033[0m \033[33;1mskipped\033[0m, \033[1m{pass_count}\033[0m \033[32;1mpassed\033[0m in \033[1m{dur:.2f} seconds\033[0m"
+        f"\033[1m{error_count}\033[0m \033[31;1mfailed\033[0m, \033[1m{skip_count}\033[0m \033[33;1mskipped\033[0m, \033[1m{pass_count}\033[0m \033[32;1mpassed\033[0m in \033[1m{duration:.2f} seconds\033[0m"
     )
     return {
+        "duration": duration,
+        "platform": sys.platform,
+        "version": sys.version,
         "passes": [test.as_dict for test in passed_tests],
         "fails": [test.as_dict for test in failed_tests],
         "skipped": [test.as_dict for test in skipped_tests],

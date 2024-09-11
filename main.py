@@ -84,10 +84,11 @@ for name, result in expected_results.items():
 # in "skipped".
 for test_run, result in actual_results.items():  # result_all, result_module, etc.
     for test_status, matching_tests in result.items():  # passes, fails, skipped
-        for test in matching_tests:
-            assert test["test_name"].endswith(
-                test_status
-            ), f"Test {test["test_name"]} does not end with {test_status}"
+        if test_status in ["passes", "fails", "skipped"]:
+            for test in matching_tests:
+                assert test["test_name"].endswith(
+                    test_status
+                ), f"Test {test["test_name"]} does not end with {test_status}"
 
 # Create a div to display the results in the page.
 page.append(
