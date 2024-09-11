@@ -79,15 +79,15 @@ for name, result in expected_results.items():
             actual == value
         ), f"Expected {value} {key} in {name}, got {actual}"
 
-# Ensure the tests that pass have a name ending in "passed", tests that fail
-# have a name ending in "failed", and tests that are skipped have a name ending
+# Ensure the tests that pass have a name ending in "passes", tests that fail
+# have a name ending in "fails", and tests that are skipped have a name ending
 # in "skipped".
-for name, result in actual_results.items():
-    for key, value in result.items():
-        for test in value:
-            assert test.test_name.endswith(
-                key
-            ), f"Test {test.test_name} does not end with {key}"
+for test_run, result in actual_results.items():  # result_all, result_module, etc.
+    for test_status, matching_tests in result.items():  # passes, fails, skipped
+        for test in matching_tests:
+            assert test["test_name"].endswith(
+                test_status
+            ), f"Test {test["test_name"]} does not end with {test_status}"
 
 # Create a div to display the results in the page.
 page.append(

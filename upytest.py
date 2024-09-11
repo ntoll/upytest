@@ -158,6 +158,19 @@ class TestCase:
             self.status = FAIL
             self.traceback = parse_traceback_from_exception(ex)
 
+    @property
+    def as_dict(self):
+        """
+        Return a dictionary representation of the test case.
+        """
+        return {
+            "module_name": self.module_name,
+            "test_name": self.test_name,
+            "status": self.status,
+            "traceback": self.traceback,
+            "reason": self.reason,
+        }
+
 
 class TestModule:
     """
@@ -508,7 +521,7 @@ async def run(*args, **kwargs):
         f"\033[1m{error_count}\033[0m \033[31;1mfailed\033[0m, \033[1m{skip_count}\033[0m \033[33;1mskipped\033[0m, \033[1m{pass_count}\033[0m \033[32;1mpassed\033[0m in \033[1m{dur:.2f} seconds\033[0m"
     )
     return {
-        "passes": passed_tests,
-        "fails": failed_tests,
-        "skipped": skipped_tests,
+        "passes": [test.as_dict for test in passed_tests],
+        "fails": [test.as_dict for test in failed_tests],
+        "skipped": [test.as_dict for test in skipped_tests],
     }

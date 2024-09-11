@@ -70,9 +70,10 @@ those who use PyTest, when using PyScript.
    `setup` and `teardown` functions can be overridden in the individual test
    modules.
 7. The `result` of awaiting `upytest.run` is a Python dictionary containing 
-  lists of tests bucketed under the keys: `"passes"`, `"fails"` and 
-  `"skipped"`. These results can be used for further processing and analysis
-  (again, see `main.py` for an example of this in action.)
+   lists of tests bucketed under the keys: `"passes"`, `"fails"` and 
+   `"skipped"`. These results are JSON serializable and can be used for further
+   processing and analysis (again, see `main.py` for an example of this in
+   action.)
 8. In your `index.html` make sure you use the `terminal` attribute
    when referencing your Python script (as in the `index.html` file in
    this repository):
