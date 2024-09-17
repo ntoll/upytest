@@ -130,7 +130,7 @@ class TestCase:
         and the unique Python id of the test function.
         """
         self.test_function = test_function
-        self.module_name = module_name
+        self.module_name = str(module_name)
         self.test_name = test_name
         self.function_id = function_id
         self.status = PENDING  # the initial state of the test.

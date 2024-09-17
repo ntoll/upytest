@@ -90,6 +90,10 @@ for test_run, result in actual_results.items():  # result_all, result_module, et
                     test_status
                 ), f"Test {test["test_name"]} does not end with {test_status}"
 
+# Ensure the results are JSON serializable.
+import json
+check = json.dumps(actual_results)
+
 # Create a div to display the results in the page.
 page.append(
     div(
