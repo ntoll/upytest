@@ -31,6 +31,7 @@ import io
 import inspect
 import time
 from pathlib import Path
+from pyscript import RUNNING_IN_WORKER
 
 try:
     # Pyodide.
@@ -259,6 +260,16 @@ class TestModule:
             or (t.test_name.split(".")[0] in test_names)
         ]
 
+    def print(self, text):
+        """
+        Print the provided text to the console.
+        """
+        if is_micropython:
+            # MicroPython doesn't flush.
+            print(text, end="")
+        else:
+            print(text, end="", flush=True)
+
     async def run(self):
         """
         Run each TestCase instance for this module. If a setup or teardown
@@ -281,11 +292,11 @@ class TestModule:
                 else:
                     self.teardown()
             if test_case.status == SKIPPED:
-                print("\033[33;1mS\033[0m", end="")
+                self.print("\033[33;1mS\033[0m")
             elif test_case.status == PASS:
-                print("\033[32;1m.\033[0m", end="")
+                self.print("\033[32;1m.\033[0m")
             else:
-                print("\033[31;1mF\033[0m", end="")
+                self.print("\033[31;1mF\033[0m")
 
 
 def gather_conftest_functions(conftest_path, target):
@@ -447,6 +458,7 @@ async def run(*args, **kwargs):
     modules.
     """
     print("Python interpreter: \033[1m", sys.platform, sys.version, "\033[0m")
+    print("Running in worker: \033[1m", RUNNING_IN_WORKER, "\033[0m")
     targets = []
     pattern = kwargs.get("pattern", "test_*.py")
     for arg in args:
@@ -524,6 +536,7 @@ async def run(*args, **kwargs):
         "duration": duration,
         "platform": sys.platform,
         "version": sys.version,
+        "running_in_worker": RUNNING_IN_WORKER,
         "passes": [test.as_dict for test in passed_tests],
         "fails": [test.as_dict for test in failed_tests],
         "skipped": [test.as_dict for test in skipped_tests],

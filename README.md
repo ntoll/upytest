@@ -71,9 +71,11 @@ those who use PyTest, when using PyScript.
    modules.
 7. The `result` of awaiting `upytest.run` is a Python dictionary containing 
    lists of tests bucketed under the keys: `"passes"`, `"fails"` and 
-   `"skipped"`. These results are JSON serializable and can be used for further
-   processing and analysis (again, see `main.py` for an example of this in
-   action.)
+   `"skipped"`. The result also provides information about the Python
+   interpreter used to run the tests, long with a boolean flag to indicate if
+   the tests were running in a web worker. These results are JSON serializable
+   and can be used for further processing and analysis (again, see `main.py`
+   for an example of this in action.)
 8. In your `index.html` make sure you use the `terminal` attribute
    when referencing your Python script (as in the `index.html` file in
    this repository):
@@ -83,7 +85,7 @@ those who use PyTest, when using PyScript.
    You should be able to use the `type` attribute of `"mpy"` (for MicroPython)
    and `"py"` (for Pyodide) interchangeably.
 
-Finally, point your browser at your `index.html` and your should see the test
+Finally, point your browser at your `index.html` and you should see the test
 suite run.
 
 ### Writing tests
@@ -208,68 +210,41 @@ The output for the test suite for this module is a good example of all the
 different sorts of information you may see:
 
 ```
-Python interpreter:  webassembly 3.4.0; MicroPython v1.24.0-preview.114.g77bd8fe5b on 2024-07-19
-Using ./tests/conftest.py for global setup and teardown in ./tests.
-Using local setup and teardown for ./tests/test_with_setup_teardown.py.
-Found 2 test module[s]. Running 18 test[s].
+Python interpreter:  webassembly 3.4.0; MicroPython v1.24.0-preview.114.g77bd8fe5b on 2024-07-19 
+Running in worker:  False 
+Using tests/conftest.py for global setup and teardown in tests/test_core_functionality.py::TestClass.
+Found 1 test module[s]. Running 8 test[s].
 
-S.F..FFFS..S.F.SF.
+F.FSSF..
 ================================= FAILURES =================================
-Failed: ./tests/test_core_functionality.py::test_does_not_raise_exception_fails
+Failed: tests/test_core_functionality.py::TestClass.test_does_not_raise_exception_fails
 Traceback (most recent call last):
-  File "upytest.py", line 147, in run
-  File "tests/test_core_functionality.py", line 77, in test_does_not_raise_exception_fails
+  File "upytest.py", line 156, in run
+  File "tests/test_core_functionality.py", line 127, in test_does_not_raise_exception_fails
 AssertionError: Did not raise expected exception. Expected ValueError; but got None.
 
 
-Failed: ./tests/test_core_functionality.py::test_fails
+Failed: tests/test_core_functionality.py::TestClass.test_fails
 Traceback (most recent call last):
-  File "upytest.py", line 147, in run
-  File "tests/test_core_functionality.py", line 46, in test_fails
+  File "upytest.py", line 156, in run
+  File "tests/test_core_functionality.py", line 119, in test_fails
 AssertionError: This test will fail
 
 
-Failed: ./tests/test_core_functionality.py::test_async_does_not_raise_exception_fails
+Failed: tests/test_core_functionality.py::TestClass.test_does_not_raise_expected_exception_fails
 Traceback (most recent call last):
-  File "upytest.py", line 145, in run
-  File "tests/test_core_functionality.py", line 121, in test_async_does_not_raise_exception_fails
-AssertionError: Did not raise expected exception. Expected ValueError; but got None.
-
-
-Failed: ./tests/test_core_functionality.py::test_async_does_not_raise_expected_exception_fails
-Traceback (most recent call last):
-  File "upytest.py", line 145, in run
-  File "tests/test_core_functionality.py", line 126, in test_async_does_not_raise_expected_exception_fails
+  File "upytest.py", line 156, in run
+  File "tests/test_core_functionality.py", line 131, in test_does_not_raise_expected_exception_fails
 AssertionError: Did not raise expected exception. Expected ValueError, AssertionError; but got TypeError.
-
-
-Failed: ./tests/test_core_functionality.py::test_does_not_raise_expected_exception_fails
-Traceback (most recent call last):
-  File "upytest.py", line 147, in run
-  File "tests/test_core_functionality.py", line 85, in test_does_not_raise_expected_exception_fails
-AssertionError: Did not raise expected exception. Expected ValueError, AssertionError; but got TypeError.
-
-
-Failed: ./tests/test_core_functionality.py::test_async_fails
-Traceback (most recent call last):
-  File "upytest.py", line 145, in run
-  File "tests/test_core_functionality.py", line 111, in test_async_fails
-AssertionError: This async test fails.
 
 ================================= SKIPPED ==================================
-Skipped: ./tests/test_core_functionality.py::test_when_skipped
-Reason: This test will be skipped with a when condition
-
-Skipped: ./tests/test_core_functionality.py::test_async_when_skipped
-Reason: This test will be skipped with a when condition
-
-Skipped: ./tests/test_core_functionality.py::test_async_skipped
-Reason: This async test will be skipped
-
-Skipped: ./tests/test_core_functionality.py::test_skipped
+Skipped: tests/test_core_functionality.py::TestClass.test_skipped
 Reason: This test will be skipped
+
+Skipped: tests/test_core_functionality.py::TestClass.test_when_skipped
+Reason: This test will be skipped with a skip_when condition
 ========================= short test summary info ==========================
-6 failed, 4 skipped, 8 passed in 0.00 seconds
+3 failed, 2 skipped, 3 passed in 0.00 seconds
 ```
 
 ## Developer setup
