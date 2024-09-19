@@ -31,6 +31,7 @@ import io
 import inspect
 import time
 from pathlib import Path
+import asyncio
 from pyscript import RUNNING_IN_WORKER
 
 try:
@@ -260,7 +261,7 @@ class TestModule:
             or (t.test_name.split(".")[0] in test_names)
         ]
 
-    def print(self, text):
+    async def print(self, text):
         """
         Print the provided text to the console.
         """
@@ -268,6 +269,9 @@ class TestModule:
             # MicroPython doesn't flush.
             print(text, end="")
         else:
+            if not RUNNING_IN_WORKER:
+                # Ensure print is non-blocking in Pyodide on main thread.
+                await asyncio.sleep(0)
             print(text, end="", flush=True)
 
     async def run(self):
@@ -279,6 +283,7 @@ class TestModule:
         Print a dot for each passing test, an F for each failing test, and an S
         for each skipped test.
         """
+        print(f"\n{self.path}: ", end="")
         for test_case in self.tests:
             if self.setup:
                 if is_awaitable(self.setup):
@@ -292,11 +297,11 @@ class TestModule:
                 else:
                     self.teardown()
             if test_case.status == SKIPPED:
-                self.print("\033[33;1mS\033[0m")
+                await self.print("\033[33;1mS\033[0m")
             elif test_case.status == PASS:
-                self.print("\033[32;1m.\033[0m")
+                await self.print("\033[32;1m.\033[0m")
             else:
-                self.print("\033[31;1mF\033[0m")
+                await self.print("\033[31;1mF\033[0m")
 
 
 def gather_conftest_functions(conftest_path, target):
@@ -470,7 +475,7 @@ async def run(*args, **kwargs):
     module_count = len(test_modules)
     test_count = sum([len(module.tests) for module in test_modules])
     print(
-        f"Found {module_count} test module[s]. Running {test_count} test[s].\n"
+        f"Found {module_count} test module[s]. Running {test_count} test[s]."
     )
 
     failed_tests = []
@@ -487,7 +492,7 @@ async def run(*args, **kwargs):
             elif test.status == PASS:
                 passed_tests.append(test)
     end = time.time()
-    print("")
+    print("\n")
     if failed_tests:
         print(
             "================================= \033[31;1mFAILURES\033[0m ================================="
@@ -502,7 +507,7 @@ async def run(*args, **kwargs):
                 "\033[0m",
                 sep="",
             )
-            print(failed.traceback)
+            print(failed.traceback.strip())
             if failed != failed_tests[-1]:
                 print("")
     if skipped_tests:
