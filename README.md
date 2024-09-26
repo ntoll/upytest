@@ -64,19 +64,21 @@ those who use PyTest, when using PyScript.
 5. If a named `pattern` argument is provided, it will be used to match test
    modules in the specification for target directories. The default pattern is
    "test_*.py".
-6. If there is a `conftest.py` file in any of the specified directories
+6. If a named `random` boolean argument is provided (default: `False`), then
+   the order in which modules and tests are run will be randomized.
+7. If there is a `conftest.py` file in any of the specified directories
    containing a test module, it will be imported for any global `setup` and
    `teardown` functions to use for modules found within that directory. These
    `setup` and `teardown` functions can be overridden in the individual test
    modules.
-7. The `result` of awaiting `upytest.run` is a Python dictionary containing 
+8. The `result` of awaiting `upytest.run` is a Python dictionary containing 
    lists of tests bucketed under the keys: `"passes"`, `"fails"` and 
    `"skipped"`. The result also provides information about the Python
    interpreter used to run the tests, long with a boolean flag to indicate if
    the tests were running in a web worker. These results are JSON serializable
    and can be used for further processing and analysis (again, see `main.py`
    for an example of this in action.)
-8. In your `index.html` make sure you use the `terminal` attribute
+9. In your `index.html` make sure you use the `terminal` attribute
    when referencing your Python script (as in the `index.html` file in
    this repository):
    ```html

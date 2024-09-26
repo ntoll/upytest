@@ -30,6 +30,7 @@ import os
 import io
 import inspect
 import time
+import random
 from pathlib import Path
 import asyncio
 from pyscript import RUNNING_IN_WORKER
@@ -118,6 +119,28 @@ def parse_traceback_from_exception(ex):
             continue
         result.append(line)
     return "\n".join(result)
+
+
+def shuffle(a_list):
+    """
+    Shuffle a list, in place. 
+    
+    This function is needed because MicroPython does not have a random.shuffle
+    function.
+
+    It falls back to random.shuffle if using CPython, otherwise it uses a
+    simple implementation of the Fisher-Yates in-place shuffle algorithm.
+
+    Context: 
+    
+    https://stackoverflow.com/questions/73143243/are-there-any-alternatives-for-the-python-module-randoms-shuffle-function-in
+    """
+    if hasattr(random, "shuffle"):
+        random.shuffle(a_list)
+    else:
+        for i in range(len(a_list) - 1, 0, -1):
+            j = random.randrange(i+1)
+            a_list[i], a_list[j] = a_list[j], a_list[i]
 
 
 class TestCase:
@@ -274,7 +297,7 @@ class TestModule:
                 await asyncio.sleep(0)
             print(text, end="", flush=True)
 
-    async def run(self):
+    async def run(self, randomize=False):
         """
         Run each TestCase instance for this module. If a setup or teardown
         exists, these will be evaluated immediately before and after the
@@ -284,6 +307,8 @@ class TestModule:
         for each skipped test.
         """
         print(f"\n{self.path}: ", end="")
+        if randomize:
+            shuffle(self._tests)
         for test_case in self.tests:
             if self.setup:
                 if is_awaitable(self.setup):
@@ -466,12 +491,16 @@ async def run(*args, **kwargs):
     print("Running in worker: \033[1m", RUNNING_IN_WORKER, "\033[0m")
     targets = []
     pattern = kwargs.get("pattern", "test_*.py")
+    randomize = kwargs.get("random", False)
+    print("Randomize test order: \033[1m", randomize, "\033[0m")
     for arg in args:
         if isinstance(arg, str):
             targets.append(arg)
         else:
             raise ValueError(f"Unexpected argument: {arg}")
     test_modules = discover(targets, pattern)
+    if randomize:
+        shuffle(test_modules)
     module_count = len(test_modules)
     test_count = sum([len(module.tests) for module in test_modules])
     print(
@@ -483,7 +512,7 @@ async def run(*args, **kwargs):
     passed_tests = []
     start = time.time()
     for module in test_modules:
-        await module.run()
+        await module.run(randomize)
         for test in module.tests:
             if test.status == FAIL:
                 failed_tests.append(test)
@@ -542,6 +571,7 @@ async def run(*args, **kwargs):
         "platform": sys.platform,
         "version": sys.version,
         "running_in_worker": RUNNING_IN_WORKER,
+        "randomize": randomize,
         "passes": [test.as_dict for test in passed_tests],
         "fails": [test.as_dict for test in failed_tests],
         "skipped": [test.as_dict for test in skipped_tests],

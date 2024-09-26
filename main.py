@@ -34,6 +34,11 @@ expected_results = {
         "fails": 9,
         "skipped": 6,
     },
+    "result_random": {
+        "passes": 11,
+        "fails": 9,
+        "skipped": 6,
+    },
     "result_module": {
         "passes": 10,
         "fails": 9,
@@ -55,6 +60,9 @@ actual_results = {}
 # Run all tests in the tests directory.
 print("\033[1mRunning all tests in directory...\033[0m")
 actual_results["result_all"] = await upytest.run("./tests")
+# Run all tests in the tests directory in random order.
+print("\n\n\033[1mRunning all tests in directory in random order...\033[0m")
+actual_results["result_random"] = await upytest.run("./tests", random=True)
 # Run all tests in a specific module.
 print("\n\n\033[1mRunning all tests in a specific module...\033[0m")
 actual_results["result_module"] = await upytest.run(
@@ -90,6 +98,13 @@ for test_run, result in actual_results.items():  # result_all, result_module, et
                     test_status
                 ), f"Test {test["test_name"]} does not end with {test_status}"
 
+# Ensure the randomized tests are different from the non-randomized tests.
+for test_status in ["passes", "fails", "skipped"]:
+    assert (
+        actual_results["result_all"][test_status]
+        != actual_results["result_random"][test_status]
+    ), f"Randomized tests are the same as non-randomized tests for {test_status}"
+
 # Ensure the results are JSON serializable.
 import json
 check = json.dumps(actual_results)
@@ -104,6 +119,15 @@ page.append(
                 f"Passes: {len(actual_results['result_all']['passes'])},"
                 f" Fails: {len(actual_results['result_all']['fails'])},"
                 f" Skipped: {len(actual_results['result_all']['skipped'])}.",
+            ),
+        ),
+        div(
+            p(
+                b("Randomized Tests: "),
+                f"Passes: {len(actual_results['result_all']['passes'])},"
+                f" Fails: {len(actual_results['result_all']['fails'])},"
+                f" Skipped: {len(actual_results['result_all']['skipped'])}.",
+                f" (Different order to the non-randomized 'All Tests').",
             ),
         ),
         div(
